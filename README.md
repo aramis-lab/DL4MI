@@ -15,6 +15,8 @@ conda activate DL4MI
 pip install -r requirements.txt
 ```
 
+## Contribute
+
 ### Using jupytext
 
 [Jupytext](https://jupytext.readthedocs.io/en/latest/index.html) is used to
@@ -37,3 +39,11 @@ If you hav an existing notebook and you want to transform it pure Python, use th
 ```
 jupytext --to py notebook.ipynb
 ```
+### Update all the notebooks
+
+Once your changes are done in the scripts (the `src_notebooks` files) run at the root folder:
+
+```
+make
+```
+This command will recreate automatically the notebooks and clean the outputs.
