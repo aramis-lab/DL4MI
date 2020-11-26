@@ -1,11 +1,10 @@
-file: index
-
-title: Deep Learning for Medical Imaging
+- file: index
+  title: Deep Learning for Medical Imaging
 
 - part: Part 1 - Classification in the context of computer-aided diagnosis 
   chapters:
-    - file: src_notebooks/part1
+    - file: src_notebooks/classification
 
 - part: Part 2 - Image synthesis
   chapters:
-    - file: src_notebooks/part2
+    - file: src_notebooks/GAN

@@ -1,8 +1,17 @@
 # Book settings
 title: Deep learning classification from brain MRI
 author: The Aramis Team
-logo: 'images/logo1.png'
+logo: 'images/logoAramis.png'
 description: Tutorial for the deep learning classification from brain MRI
+
+exclude_patterns:
+  -  _build
+  - Thumbs.db
+  - .DS_Store
+  - "**.ipynb_checkpoints"
+  - "figures"
+  - "datasets"
+  - "README.md"
 
 launch_buttons:
   colab_url: "https://colab.research.google.com"
@@ -13,23 +22,26 @@ launch_buttons:
 execute:
   execute_notebooks         : "off"  # Whether to execute notebooks at build time. Must be one of ("auto", "force", "cache", "off")
   cache                     : ""  # A path to the jupyter cache that will be used to store execution artifacs. Defaults to `_build/.jupyter_cache/`
-  exclude_patterns          : []  # A list of patterns to *skip* in execution (e.g. a notebook that takes a really long time)
 
 html:
-  #favicon: images/favicon.ico
+  #favicon: _static/favicon.ico
   google_analytics_id: UA-173464732-1 
   home_page_in_navbar: false
   use_edit_page_button: true
   use_repository_button: true
   use_issues_button: true
-  baseurl: https://aramislab.paris.inria.fr/clinicadl/tuto/
+  baseurl: https://aramislab.paris.inria.fr/clinicadl/DL4MI/
 
 repository:
-  url: https://github.com/aramis-lab/MICCAI-educational-challenge-2020/
+  url: https://github.com/aramis-lab/DL4MI/ 
   branch: master
 
 sphinx:
   config:
+    nb_custom_formats:
+      .py:
+        - jupytext.reads
+        - fmt: py:percent
     mathjax_config:
       TeX:
         Macros:
@@ -40,3 +52,9 @@ sphinx:
   extra_extensions:
     - sphinx_click.ext
     - sphinx_tabs.tabs
+
+
+latex:
+  latex_engine                : "xelatex"
+  latex_documents:
+    targetname: book.tex     

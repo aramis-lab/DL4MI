@@ -1,3 +1,8 @@
 # Package to install to buil the document
-
+sphinx-tabs
+sphinx-click
+myst-parser
+myst-nb
+jupyterlab
+jupytext
 jupyter-book
