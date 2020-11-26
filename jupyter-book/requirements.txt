@@ -1,0 +1,3 @@
+# Package to install to buil the document
+
+jupyter-book

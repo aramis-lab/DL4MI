@@ -1,0 +1,20 @@
+file: intro
+title: Deep learning classification from brain MRI
+sections:
+- header: Background
+- file: Notebooks-AD-DL/clinical.md
+  title: Clinical context
+- file: Notebooks-AD-DL/deep_learning.md
+  title: Deep learning classification
+
+- header: The basics
+- file: Notebooks-AD-DL/preprocessing
+  title: Prepare your neuroimaging data
+- file: Notebooks-AD-DL/inference
+  title: Perfom classification using pretrained models
+
+- header: Going further
+- file: Notebooks-AD-DL/label_extraction
+  title: Define your population
+- file: Notebooks-AD-DL/training
+  title: Train your own models
