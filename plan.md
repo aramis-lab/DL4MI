@@ -1,15 +1,16 @@
-# Intro: Classification
-(slides)
-
-## Content
-
-- Item 1
-- Item 2
-- Item 3
 
 # Morning Session - Classification of AD
 
-## Notebook 1: Part 1
+## Itroduction to Classification
+(slides)
+
+### Content
+
+- Using Deep Learning for Classification
+- Convolutional Neural Networks
+- Other...
+
+## Notebook 1: Classification of Alzheimer's disease diagnosis (Part 1)
 
 ### Learning goals:
 
@@ -21,7 +22,7 @@
 
 Brief description
 
-## Notebook 2: Classification of Alzheimer's disease diagnosis (Part 1)
+## Notebook 2: Classification of Alzheimer's disease diagnosis (Part 2)
 
 ### Learning goals:
 
@@ -32,7 +33,6 @@ Brief description
 ### Content
 
 Brief description
-
 
 # Afternoon Session - Conditional Generative Adversarial Network 
 
