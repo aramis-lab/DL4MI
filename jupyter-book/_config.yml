@@ -34,6 +34,7 @@ html:
 
 repository:
   url: https://github.com/aramis-lab/DL4MI/ 
+  path_to_book: jupyter-book/
   branch: master
 
 sphinx:
