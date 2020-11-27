@@ -13,6 +13,5 @@ generative adversarial networks.
 Prerequisite: programming knowledge in languages such as Python (preferred),
 Matlab or R.
 
-```
-{tableofcontents}
+```{tableofcontents}
 ```
