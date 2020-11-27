@@ -1,5 +1,5 @@
 # Book settings
-title: Deep learning classification from brain MRI
+title: Deep learning for Medical Imaging
 author: The Aramis Team
 logo: 'images/logoAramis.png'
 description: Tutorial for the deep learning classification from brain MRI
@@ -13,9 +13,15 @@ exclude_patterns:
   - "datasets"
   - "README.md"
 
+repository:
+  url: https://github.com/aramis-lab/DL4MI 
+  path_to_book: jupyter-book/
+  branch: main
+
 launch_buttons:
-  colab_url: "https://colab.research.google.com"
-   # jupyterhub_url: "localhost:8080"  # The URL for your JupyterHub. (e.g., https://datahub.berkeley.edu)
+  notebook_interface: classic
+  colab_url: https://colab.research.google.com
+  jupyterhub_url: "localhost:8080"  # The URL for your JupyterHub. (e.g., https://datahub.berkeley.edu)
 
 ######################################################################################
 # Execution settings
@@ -32,10 +38,6 @@ html:
   use_issues_button: true
   baseurl: https://aramislab.paris.inria.fr/clinicadl/DL4MI/
 
-repository:
-  url: https://github.com/aramis-lab/DL4MI/ 
-  path_to_book: jupyter-book/
-  branch: master
 
 sphinx:
   config:
