@@ -1,7 +1,7 @@
 
 # Morning Session - Classification of AD
 
-## Itroduction to Classification
+## Introduction to Classification
 (slides)
 
 ### Content
@@ -35,6 +35,16 @@ Brief description
 Brief description
 
 # Afternoon Session - Conditional Generative Adversarial Network 
+
+## Introduction to CGANs
+(slides)
+
+### Content
+
+- What is CGANs ?
+- The Generator
+- The Discrimminator
+- Other...
 
 ## Notebook 1: Conditional Generative Adversarial Network
 
