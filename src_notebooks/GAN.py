@@ -15,33 +15,40 @@
 # In this lab we will train a conditional generative adversarial network (cGAN)
 # to synthesize **T2-w MRI** from **T1-w MRI**.
 #
-# The outline of this lab is: 1. Create a cGAN with a given architecture for
-# the generator and for the discriminator 2. Train this cGAN on the [IXI
-# dataset](https://brain-development.org/ixi-dataset/) to transform **T1-w
-# MRI** into **T2-w MRI**.  3. Evaluate the quality of the generated images
-# using standard metrics.
+# The outline of this lab is:
+#
+# 1. Create a cGAN with a given architecture for the generator and for the
+# discriminator.
+# 2. Train this cGAN on the
+# [IXI dataset](https://brain-development.org/ixi-dataset/)
+# to transform **T1-w MRI** into **T2-w MRI**.
+# 3. Evaluate the quality of the generated images using standard metrics.
 #
 # But first we will fetch the dataset and have a look at it to see what the
-# tasks looks like.
+# task looks like.
 
-# + [markdown] id="ZUkSzEkH5WUK" # 0. Fetching the dataset
+# + [markdown] id="ZUkSzEkH5WUK"
+# # 0. Fetching the dataset
 
-# + [markdown] id="JePGT61J5cVV" The dataset can be found on this [GitHub
-# repository](https://github.com/Easternwen/IXI-dataset). In the `size64`
-# folder, there are 1154 files: 2 images for 577 subjects. The size of each
-# image is (64, 64).
+# + [markdown] id="JePGT61J5cVV"
+# The dataset can be found on this
+# [GitHub repository](https://github.com/Easternwen/IXI-dataset).
+# In the `size64` folder, there are 1154 files: 2 images for 577 subjects.
+# The size of each image is (64, 64).
 #
 # Let's clone the repository and have a look at the data.
 
 # + id="KV3cmAW-3ULI" colab={"base_uri": "https://localhost:8080/"}
-# outputId="e10800b0-7e00-4626-a75f-5c9ecc08e08a" Get the dataset from the
-# GitHub repository
-# ! git clone https://github.com/Easternwen/IXI-dataset.git
+# Get the dataset from the GitHub repository
+! git clone https://github.com/Easternwen/IXI-dataset.git
 
-# + [markdown] id="1_6dDqW570zt" The dataset used in this lab is composed of
-# preprocessed images from the [IXI
-# dataset](https://brain-development.org/ixi-dataset/). Two different
-# structural MRI modalities are comprised in this dataset: - T1 weighted images
+# + [markdown] id="1_6dDqW570zt"
+# The dataset used in this lab is composed of preprocessed images from the
+# [IXI dataset](https://brain-development.org/ixi-dataset/). Two different
+# structural MRI modalities are comprised in this dataset:
+#
+# - T1 weighted images
+#
 # - T2 weighted images
 #
 # These modalities do not highlight the same tissues: for example the CSF
@@ -49,24 +56,28 @@
 # the T2 weighted imaging.
 
 # + colab={"base_uri": "https://localhost:8080/"} id="538n0mwe7zCO" outputId="50748e0d-f8c7-4407-a0d4-cdf26834061e"
-# !ls ./IXI-dataset/size64
+# ! ls ./IXI-dataset/size64
 
 # + id="BTWQREI29Rmt" colab={"base_uri": "https://localhost:8080/", "height": 281} outputId="7b6c7a7f-057e-499b-d1fd-fbe7efabe2e8"
 import matplotlib.pyplot as plt
 import os
 import torch
 
-input_path = "./IXI-dataset/size64/"
+
+root = "./IXI-dataset/size64/"
 
 plt.figure(figsize=(12, 4))
 
 plt.subplot(1, 2, 1)
-plt.imshow(torch.load(os.path.join(input_path, 'sub-IXI002 - T1.pt')), cmap='gray', origin='lower')
+plt.imshow(torch.load(os.path.join(root, 'sub-IXI002 - T1.pt')),
+           cmap='gray', origin='lower')
 plt.title("T1 slice for subject 002")
 
 plt.subplot(1, 2, 2)
-plt.imshow(torch.load(os.path.join(input_path, 'sub-IXI002 - T2.pt')), cmap='gray', origin='lower')
-plt.title("T2 slice for subject 002");
+plt.imshow(torch.load(os.path.join(root, 'sub-IXI002 - T2.pt')),
+           cmap='gray', origin='lower')
+plt.title("T2 slice for subject 002")
+plt.show()
 
 # + id="sisW1h7q3UWS"
 from __future__ import print_function
@@ -88,14 +99,14 @@ import datetime
 import sys
 from torchvision.utils import save_image
 
-# + [markdown] id="MBWLhf73MdRE" Let's create a custom `MvaDataset` class to
-# easily have access to the data.  Here we don't use tsv files to split
-# subjects between the training and the test set. We only set the dataset to
-# the `train` or `test` mode to access training or test data.
+# + [markdown] id="MBWLhf73MdRE"
+# Let's create a custom `MvaDataset` class to easily have access to the data.
+# Here we don't use tsv files to split subjects between the training and the
+# test set. We only set the dataset to the `train` or `test` mode to access
+# training or test data.
 
 # + id="aaVklVW83Ud5"
 import os
-
 
 # Create the dataset
 
@@ -112,42 +123,48 @@ class MvaDataset(torch.utils.data.Dataset):
         and 'test' to get the test set.
 
     """
-    def __init__(self, root, mode="train"): 
-        
-        files = sorted(os.listdir(root)) 
+    def __init__(self, root, mode="train"):
+
+        files = sorted(os.listdir(root))
         patient_id = list(set([i.split()[0] for i in files]))
-        
+
         imgs = []
-        
-        if mode =="train":   
+
+        if mode == "train":
             for i in patient_id[:int(0.8*len(patient_id))]:
-                if os.path.isfile(os.path.join(root, i + " - T1.pt")) and os.path.isfile(os.path.join(root, i + " - T2.pt")):
-                    imgs.append((os.path.join(root, i + " - T1.pt"), os.path.join(root, i + " - T2.pt")))
-        
-        elif mode =="test":
+                if (
+                    os.path.isfile(os.path.join(root, i + " - T1.pt")) and
+                    os.path.isfile(os.path.join(root, i + " - T2.pt"))
+                ):
+                    imgs.append((os.path.join(root, i + " - T1.pt"),
+                                 os.path.join(root, i + " - T2.pt")))
+
+        elif mode == "test":
             for i in patient_id[int(0.8*len(patient_id)):]:
-                if os.path.isfile(os.path.join(root, i + " - T1.pt")) and os.path.isfile(os.path.join(root, i + " - T2.pt")):
-                    imgs.append((os.path.join(root, i + " - T1.pt"), os.path.join(root, i + " - T2.pt")))            
-        
+                if (
+                    os.path.isfile(os.path.join(root, i + " - T1.pt")) and
+                    os.path.isfile(os.path.join(root, i + " - T2.pt"))
+                ):
+                    imgs.append((os.path.join(root, i + " - T1.pt"),
+                                 os.path.join(root, i + " - T2.pt")))
+
         self.imgs = imgs
-        
+
     def __getitem__(self, index):
         t1_path, t2_path = self.imgs[index]
-        
+
         t1 = torch.load(t1_path)[None, :, :]
         t2 = torch.load(t2_path)[None, :, :]
-            
+
         return {"T1": t1, "T2": t2}
 
     def __len__(self):
         return len(self.imgs)
-  
 
 
-# + [markdown] id="o4_sbeIaNqKt" Using this class and the `DataLoader` class
-# from `torch.utils.data`, you can easily have access to your dataset. Here is
-# a quick
-# example on how to use it:
+# + [markdown] id="o4_sbeIaNqKt"
+# Using this class and the `DataLoader` class from `torch.utils.data`, you can
+# easily have access to your dataset. Here is a quick example on how to use it:
 #
 # ```python
 # from torch.utils.data import DataLoader
@@ -158,7 +175,7 @@ class MvaDataset(torch.utils.data.Dataset):
 # # You will get a batch of samples from the training set
 # dataloader = DataLoader(
 #     MvaDataset(root, mode="train"),
-#     batch_size=batch,
+#     batch_size=1,
 #     shuffle=False,
 # )
 #
@@ -175,10 +192,13 @@ class MvaDataset(torch.utils.data.Dataset):
 # ## 1.1 Generator = U-Net
 
 # + [markdown] id="Z8gzaU6bwNjy"
-# For the generator we will use a U-Net where: * the descending blocks are
-# convolutional layers followed by instance normalization with a LeakyReLU
-# activation function; * the ascending blocks are transposed convolutional
-# layers followed by instance normalization with a ReLU activation function.
+# For the generator we will use a U-Net where:
+#
+# * the descending blocks are convolutional layers followed by instance
+# normalization with a LeakyReLU activation function;
+#
+# * the ascending blocks are transposed convolutional layers followed by
+# instance normalization with a ReLU activation function.
 #
 # The parameters for each layer are given in the picture below.
 
@@ -211,16 +231,19 @@ class GeneratorUNet(nn.Module):
 
 
 # + id="vqis-YL30eef" colab={"base_uri": "https://localhost:8080/", "height": 918} outputId="07ebdc54-ca65-444f-dc44-eb5d52d61f32"
-# Summary of the generator 
+# Summary of the generator
 G = GeneratorUNet().cuda()
 summary(G, (1, 64, 64) )
 
 # + [markdown] id="bU5ENsZntx9r" ## 1.2 Discriminator = 2D-CNN
 #
 # For the discriminator we will use a two-dimensional convolutional neural
-# network with 5 layers: * the first 4 layers are 2D-convolutional layers with
-# a LeakyReLU activation function.  * the last layer is a 2D-convolutional
-# layer.
+# network with 5 layers:
+#
+# * the first 4 layers are 2D-convolutional layers with  a LeakyReLU activation
+# function;
+#
+# * the last layer is a 2D-convolutional layer.
 #
 # The parameters for each layer are given in the figure below. Don't forget
 # that the input of the discriminator will be the generated image and the true
@@ -240,13 +263,11 @@ summary(G, (1, 64, 64) )
 
 
 # + id="RAB91T9M4kd4"
-# Define the blocks used for the discriminator 
+# Define the blocks used for the discriminator
 
-def discriminator_block(in_filters, out_filters, normalization=False):
+def discriminator_block(in_filters, out_filters):
     """Returns downsampling layers of each discriminator block"""
     layers = [nn.Conv2d(in_filters, out_filters, 3, stride=2, padding=1)]
-    if normalization:
-        layers.append(nn.InstanceNorm2d(out_filters))
     layers.append(nn.LeakyReLU(0.2, inplace=True))
     return layers
 
@@ -266,7 +287,7 @@ class Discriminator(nn.Module):
 
 
 # + id="99IcSN3H4nDw" colab={"base_uri": "https://localhost:8080/", "height": 391} outputId="1e410849-bb9a-438b-e9cf-5997db6c4d4b"
-# Summary of the discriminator 
+# Summary of the discriminator
 D = Discriminator().cuda()
 summary(D, [(1, 64, 64), (1, 64, 64)])
 
@@ -286,10 +307,12 @@ summary(D, [(1, 64, 64), (1, 64, 64)])
 #
 # **Training the generator**
 #
-# The loss for the generator is the sum of: * the binary cross-entropy loss
-# between the predicted probabilities of the generated images and positive
-# labels, * the pixel-wise mean absolute error between the generated image and
-# the true image.
+# The loss for the generator is the sum of:
+#
+# * the binary cross-entropy loss between the predicted probabilities of the
+# generated images and positive labels,
+# * the pixel-wise mean absolute error between the generated image and the true
+# image.
 #
 # For one sample, it is then:
 # $$
@@ -298,9 +321,11 @@ summary(D, [(1, 64, 64), (1, 64, 64)])
 #
 # **Training the discriminator**
 #
-# The loss for the generator is the mean of: * the binary cross-entropy loss
-# between the predicted probabilities of the generated images and negative
-# labels, * the binary cross-entropy loss between the predicted probabilities
+# The loss for the generator is the mean of:
+#
+# * the binary cross-entropy loss between the predicted probabilities of the
+# generated images and negative labels,
+# * the binary cross-entropy loss between the predicted probabilities
 # of the true images and positive labels.
 #
 # For one sample, it is then:
@@ -339,7 +364,7 @@ def train(train_loader, test_loader, num_epoch=500,
           lr=0.0001, beta1=0.9, beta2=0.999):
     """
     Method used to train a generator in an adversarial framework.
-    
+
     Args:
         train_loader: (DataLoader) a DataLoader wrapping a the training dataset
         test_loader: (DataLoader) a DataLoader wrapping a the training dataset
@@ -353,21 +378,21 @@ def train(train_loader, test_loader, num_epoch=500,
     """
 
     cuda = True if torch.cuda.is_available() else False
-    print("cuda %s"%(cuda))  # check if GPU is used 
+    print("cuda %s" % cuda)  # check if GPU is used
 
     # Tensor type (put everything on GPU if possible)
-    Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor 
+    Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
-    # Output folder 
+    # Output folder
     if not os.path.exists("./images"):
         os.makedirs("./images")
-     
-    # Loss functions
-    criterion_GAN = torch.nn.BCEWithLogitsLoss() # A loss adapted to binary classification like torch.nn.BCEWithLogitsLoss
-    criterion_pixelwise = torch.nn.L1Loss() # A loss for a voxel-wise comparison of images like torch.nn.L1Loss
 
-    lambda_GAN  = 1 # Weights criterion_GAN in the generator loss
-    lambda_pixel = 0 # Weights criterion_pixelwise in the generator loss
+    # Loss functions
+    criterion_GAN = torch.nn.BCEWithLogitsLoss()  # A loss adapted to binary classification like torch.nn.BCEWithLogitsLoss
+    criterion_pixelwise = torch.nn.L1Loss()  # A loss for a voxel-wise comparison of images like torch.nn.L1Loss
+
+    lambda_GAN = 1  # Weights criterion_GAN in the generator loss
+    lambda_pixel = 0  # Weights criterion_pixelwise in the generator loss
 
     # Initialize generator and discriminator
     generator = GeneratorUNet()
@@ -380,9 +405,11 @@ def train(train_loader, test_loader, num_epoch=500,
         criterion_pixelwise.cuda()
 
     # Optimizers
-    optimizer_G = torch.optim.Adam(generator.parameters(), lr=lr, betas=(beta1, beta2))
-    optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=lr, betas=(beta1, beta2))  
-     
+    optimizer_G = torch.optim.Adam(generator.parameters(),
+                                   lr=lr, betas=(beta1, beta2))
+    optimizer_D = torch.optim.Adam(discriminator.parameters(),
+                                   lr=lr, betas=(beta1, beta2))
+
     def sample_images(epoch):
         """Saves a generated sample from the validation set"""
         imgs = next(iter(test_loader))
@@ -390,25 +417,28 @@ def train(train_loader, test_loader, num_epoch=500,
         real_B = Variable(imgs["T2"].type(Tensor))
         fake_B = generator(real_A)
         img_sample = torch.cat((real_A.data, fake_B.data, real_B.data), -2)
-        save_image(img_sample, "./images/epoch-%s.png" % epoch, nrow=5, normalize=True)
-        
+        save_image(img_sample, "./images/epoch-%s.png" % epoch,
+                   nrow=5, normalize=True)
+
     # ----------
     #  Training
     # ----------
 
     prev_time = time.time()
-    
+
     for epoch in range(num_epoch):
         for i, batch in enumerate(train_loader):
 
             # Inputs T1-w and T2-w
             real_A = Variable(batch["T1"].type(Tensor))
             real_B = Variable(batch["T2"].type(Tensor))
-            
+
             # Create labels
-            valid = Variable(Tensor(np.ones((real_B.size(0), 1, 1, 1))), requires_grad=False)
-            fake = Variable(Tensor(np.zeros((real_B.size(0), 1, 1, 1))), requires_grad=False)
-            
+            valid = Variable(Tensor(np.ones((real_B.size(0), 1, 1, 1))),
+                             requires_grad=False)
+            fake = Variable(Tensor(np.zeros((real_B.size(0), 1, 1, 1))),
+                            requires_grad=False)
+
             # ------------------
             #  Train Generators
             # ------------------
@@ -424,8 +454,7 @@ def train(train_loader, test_loader, num_epoch=500,
 
             loss_G.backward()
             optimizer_G.step()
-                            
-                            
+
             # ---------------------
             #  Train Discriminator
             # ---------------------
@@ -445,7 +474,7 @@ def train(train_loader, test_loader, num_epoch=500,
 
             loss_D.backward()
             optimizer_D.step()
-                            
+
             # --------------
             #  Log Progress
             # --------------
@@ -453,12 +482,14 @@ def train(train_loader, test_loader, num_epoch=500,
             # Determine approximate time left
             batches_done = epoch * len(train_loader) + i
             batches_left = num_epoch * len(train_loader) - batches_done
-            time_left = datetime.timedelta(seconds=batches_left * (time.time() - prev_time))
+            time_left = datetime.timedelta(
+                seconds=batches_left * (time.time() - prev_time))
             prev_time = time.time()
-                            
+
             # Print log
             sys.stdout.write(
-                "\r[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f, pixel: %f, adv: %f] ETA: %s"
+                "\r[Epoch %d/%d] [Batch %d/%d] [D loss: %f] "
+                "\r[G loss: %f, pixel: %f, adv: %f] ETA: %s"
                 % (
                     epoch,
                     num_epoch,
@@ -470,8 +501,8 @@ def train(train_loader, test_loader, num_epoch=500,
                     loss_GAN.item(),
                     time_left,
                 )
-            )            
-                            
+            )
+
         # Save images at the end of each epoch
         sample_images(epoch)
 
@@ -489,26 +520,27 @@ beta2 = 0.999
 batch_size = 40
 train_loader = DataLoader(MvaDataset(root, mode="train"),
                           batch_size=batch_size,
-													shuffle=True,
-													)
+                          shuffle=True)
 
 test_loader = DataLoader(MvaDataset(root, mode="test"),
                          batch_size=5,
-												 shuffle=False,
-												 )
+                         shuffle=False)
 
 num_epoch = 20
 
-generator = train(train_loader, test_loader, num_epoch=num_epoch, lr=lr, beta1=beta1, beta2=beta2)
+generator = train(train_loader, test_loader, num_epoch=num_epoch,
+                  lr=lr, beta1=beta1, beta2=beta2)
 
 # + id="W4l8dClo5A49"
-import matplotlib.pyplot as plt 
-import matplotlib.image as img 
+import matplotlib.pyplot as plt
+import matplotlib.image as img
 
-plt.figure(figsize=(20,20))
-# reading png image file 
+
+plt.figure(figsize=(20, 20))
+
+# Reading an image saved as a png file
 im = img.imread('./images/epoch-%s.png' % (num_epoch - 1))
-plt.imshow(np.swapaxes(im,0,1))
+plt.imshow(np.swapaxes(im, 0, 1))
 plt.gca().invert_yaxis()
 plt.show()
 
@@ -523,14 +555,14 @@ plt.show()
 #
 # * PSNR = $10 \log_{10} \left( \frac{MAX_I^2}{MSE} \right) $ where $MAX_I^2$
 # is the maximum possible value of the image (equal to 1 in our case since the
-# images are scaled in range $[-1, 1]$). The higher, the better. 
+# images are scaled in range $[-1, 1]$). The higher, the better.
 #
 # * SSIM = $ \frac{(2 \mu_T \mu_G + C_1)(2 \sigma_{TG} + C_2)}{(\mu_T^2 +
 # \mu_G^2 + C_1)(\sigma_T^2 + \sigma_G^2 + C2)} $ where $\mu$ and $\sigma$ are
 # the mean value and standard deviation of an image respectively and $C_1$ and
 # $C_2$ are two positive constants (one can take $C_1=0.01$ and $C_2=0.03$).
 #
-# To better understand the differences between metrics:
+# To better understand the differences between these metrics:
 # https://www.pyimagesearch.com/2014/09/15/python-compare-two-images/
 
 # + id="QMnEX2hUI5X7" cellView="form" colab={"base_uri": "https://localhost:8080/", "height": 91} outputId="8d1c4c36-eeee-489d-d923-8d17cd023835"
@@ -560,12 +592,13 @@ def SSIM(image_true, image_generated, C1=0.01, C2=0.03):
 # + id="0NR07IsNWkc6"
 import pandas as pd
 
-def evaluate_metrics(dataloader):
+
+def compute_metrics(dataloader):
 
     res = []
 
     cuda = True if torch.cuda.is_available() else False
-    Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor 
+    Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
     for i, batch in enumerate(dataloader):
 
@@ -597,8 +630,8 @@ test_dataloader = DataLoader(
     shuffle=False,
 )
 
-df_train = evaluate_metrics(train_loader)
-df_test = evaluate_metrics(test_loader)
+df_train = compute_metrics(train_loader)
+df_test = compute_metrics(test_loader)
 
 # + id="jFe9cGBnnuwX"
 df_train
