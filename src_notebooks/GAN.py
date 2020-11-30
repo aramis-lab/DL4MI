@@ -11,7 +11,7 @@
 #     name: python3
 # ---
 
-# %% [markdown]
+# + [markdown]
 # In this lab we will train a conditional generative adversarial network (cGAN)
 # to synthesize **T2-w MRI** from **T1-w MRI**.
 #
@@ -27,7 +27,7 @@
 # But first we will fetch the dataset and have a look at it to see what the
 # task looks like.
 
-# %% [markdown]
+# + [markdown]
 # # 0. Fetching the dataset
 #
 # The dataset can be found on this
@@ -37,11 +37,11 @@
 #
 # Let's clone the repository and have a look at the data.
 
+# + [code]
 # Get the dataset from the GitHub repository
-# 
 ! git clone https://github.com/Easternwen/IXI-dataset.git
 
-# %% [markdown]
+# + [markdown]
 # The dataset used in this lab is composed of preprocessed images from the
 # [IXI dataset](https://brain-development.org/ixi-dataset/). Two different
 # structural MRI modalities are comprised in this dataset:
@@ -54,9 +54,7 @@
 # voxels are cancelled in T1 weighted imaging whereas they are highlighted by
 # the T2 weighted imaging.
 
-# + colab={"base_uri": "https://localhost:8080/"} id="538n0mwe7zCO" outputId="50748e0d-f8c7-4407-a0d4-cdf26834061e"
-# ! ls ./IXI-dataset/size64
-
+# + [code]
 import matplotlib.pyplot as plt
 import os
 import torch
@@ -77,7 +75,7 @@ plt.imshow(torch.load(os.path.join(root, 'sub-IXI002 - T2.pt')),
 plt.title("T2 slice for subject 002")
 plt.show()
 
-# %% [markdown]
+# + [code]
 from __future__ import print_function
 
 
@@ -97,27 +95,22 @@ import datetime
 import sys
 from torchvision.utils import save_image
 
-# %% [markdown] 
+# + [markdown]
 # Let's create a custom `MvaDataset` class to easily have access to the data.
 # Here we don't use tsv files to split subjects between the training and the
 # test set. We only set the dataset to the `train` or `test` mode to access
 # training or test data.
 
+# + [code]
 import os
 
-# Create the dataset
 
 class MvaDataset(torch.utils.data.Dataset):
     """Dataset utility class.
 
-    Parameters
-    ----------
-    root : str
-        Path of the folder with all the images.
-
-    mode : {'train' or 'test'} (default = 'train')
-        Part of the dataset that is loaded. Use 'train' to get the training set
-        and 'test' to get the test set.
+    Args:
+        root: (str) Path of the folder with all the images.
+        mode : {'train' or 'test'} Part of the dataset that is loaded.
 
     """
     def __init__(self, root, mode="train"):
@@ -159,7 +152,7 @@ class MvaDataset(torch.utils.data.Dataset):
         return len(self.imgs)
 
 
-# %% [markdown]
+# + [markdown]
 # Using this class and the `DataLoader` class from `torch.utils.data`, you can
 # easily have access to your dataset. Here is a quick example on how to use it:
 #
@@ -182,7 +175,7 @@ class MvaDataset(torch.utils.data.Dataset):
 #     # - batch["T2"] is a tensor with shape (batch_size, 64, 64) with the T2 images for the samples in this batch
 # ```
 
-# %% [markdown]
+# + [markdown]
 # # 1. Creating your conditional GAN
 #
 # ## 1.1 Generator = U-Net
@@ -197,39 +190,105 @@ class MvaDataset(torch.utils.data.Dataset):
 #
 # The parameters for each layer are given in the picture below.
 
-# %% [markdown] 
+# + [markdown]
 # <a href="https://ibb.co/QXBDNy3"><img src="https://i.ibb.co/g614TkL/Capture-d-cran-2020-03-02-16-04-06.png" width="800" alt="Capture-d-cran-2020-03-02-16-04-06" border="0"></a>
 
-# + id="7WHqr8UtDgUM" cellView="form" colab={"base_uri": "https://localhost:8080/", "height": 74} outputId="7a99a557-eef2-4830-f828-081a1e543e1d"
-#@title
-# %%html
-<div style='background-color:rgba(80,255,80,0.4); padding:20px'>
-  <b>Exercise</b>: Create a <code>GeneratorUNet</code> class to define the generator
-  with the architecture given above.
-</div>
+# + [markdown]
+# <div class="alert alert-block alert-info">
+# <b>Exercise</b>: Create a <code>GeneratorUNet</code> class to define the
+# generator with the architecture given above.
+# </div>
+
+# + [code]
+# Define the blocks used for U-Net
+
+class UNetDown(nn.Module):
+    def __init__(self, in_size, out_size):
+        super(UNetDown, self).__init__()
+        self.model = nn.Sequential(
+            nn.Conv2d(in_size, out_size, kernel_size=3, stride=2, padding=1),
+            nn.InstanceNorm2d(out_size),
+            nn.LeakyReLU(0.2)
+          )
+
+    def forward(self, x):
+        return self.model(x)
 
 
+class UNetUp(nn.Module):
+    def __init__(self, in_size, out_size):
+        super(UNetUp, self).__init__()
+        self.model = nn.Sequential(
+            nn.ConvTranspose2d(in_size, out_size, kernel_size=4,
+                               stride=2, padding=1),
+            nn.InstanceNorm2d(out_size),
+            nn.ReLU(inplace=True)
+        )
+
+    def forward(self, x, skip_input=None):
+        if skip_input is not None:
+            x = torch.cat((x, skip_input), 1)  # add the skip connection
+        x = self.model(x)
+        return x
+
+
+class FinalLayer(nn.Module):
+    def __init__(self, in_size, out_size):
+        super(FinalLayer, self).__init__()
+        self.model = nn.Sequential(
+            nn.Upsample(scale_factor=2),
+            nn.Conv2d(in_size, out_size, kernel_size=3, padding=1),
+            nn.Tanh(),
+        )
+
+    def forward(self, x, skip_input=None):
+        if skip_input is not None:
+            x = torch.cat((x, skip_input), 1)  # add the skip connection
+        x = self.model(x)
+        return x
+
+# + [code]
 ##############################
 #      Generator U-NET
 ##############################
 
 class GeneratorUNet(nn.Module):
-    def __init__(self):
+    def __init__(self, in_channels=1, out_channels=1):
         super(GeneratorUNet, self).__init__()
-        # TODO
+
+        self.down1 = UNetDown(in_channels, 64)
+        self.down2 = UNetDown(64, 128)
+        self.down3 = UNetDown(128, 256)
+        self.down4 = UNetDown(256, 512)
+        self.down5 = UNetDown(512, 512)
+
+        self.up1 = UNetUp(512, 512)
+        self.up2 = UNetUp(1024, 256)
+        self.up3 = UNetUp(512, 128)
+        self.up4 = UNetUp(256, 64)
+
+        self.final = FinalLayer(128, 1)
 
     def forward(self, x):
-        # TODO
+        d1 = self.down1(x)
+        d2 = self.down2(d1)
+        d3 = self.down3(d2)
+        d4 = self.down4(d3)
+        d5 = self.down5(d4)
 
-        return final
+        u1 = self.up1(d5)
+        u2 = self.up2(u1, d4)
+        u3 = self.up3(u2, d3)
+        u4 = self.up4(u3, d2)
 
+        return self.final(u4, d1)
 
-# + id="vqis-YL30eef" colab={"base_uri": "https://localhost:8080/", "height": 918} outputId="07ebdc54-ca65-444f-dc44-eb5d52d61f32"
+# + [code]
 # Summary of the generator
 G = GeneratorUNet().cuda()
 summary(G, (1, 64, 64) )
 
-# %% [markdown] 
+# + [markdown]
 # ## 1.2 Discriminator = 2D-CNN
 #
 # For the discriminator we will use a two-dimensional convolutional neural
@@ -245,22 +304,20 @@ summary(G, (1, 64, 64) )
 # image since we are using a conditional GAN. Therefore, the number of input
 # channels for the first layer will be two (one for each image).
 
-# %% [markdown]
+# + [markdown]
 # <a href="https://ibb.co/9b2jF0V"><img src="https://i.ibb.co/hBHvPNZ/Capture-d-cran-2020-03-02-16-04-14.png" width="800" alt="Capture-d-cran-2020-03-02-16-04-14" border="0"></a>
 
-# + id="i7UADZ7TC5qC" cellView="form" colab={"base_uri": "https://localhost:8080/", "height": 74} outputId="287755fc-1d17-46ae-cac4-5fa6c9191ac3"
-#@title
-# %%html
-<div style='background-color:rgba(80,255,80,0.4); padding:20px'>
-  <b>Exercise</b>: Create a <code>Discriminator</code> class to define the discriminator
-  with the architecture given above.
-</div>
+# + [markdown]
+# <div class="alert alert-block alert-info">
+#  <b>Exercise</b>: Create a <code>Discriminator</code> class to define the
+#  discriminator with the architecture given above.
+# </div>
 
-
+# + [code]
 # Define the blocks used for the discriminator
 
 def discriminator_block(in_filters, out_filters):
-    """Returns downsampling layers of each discriminator block"""
+    """Return downsampling layers of each discriminator block"""
     layers = [nn.Conv2d(in_filters, out_filters, 3, stride=2, padding=1)]
     layers.append(nn.LeakyReLU(0.2, inplace=True))
     return layers
@@ -269,23 +326,31 @@ def discriminator_block(in_filters, out_filters):
 #        Discriminator
 ##############################
 
-class Discriminator(nn.Module):
-    def __init__(self):
-        super(Discriminator, self).__init__()
-        # TODO
 
-    def forward(self, T1_img, T2_img):
-        # TODO
-        img_input = torch.cat((T1_img, T2_img), 1)
+class Discriminator(nn.Module):
+    def __init__(self, in_channels=1):
+        super(Discriminator, self).__init__()
+
+        layers = []
+        layers.extend(discriminator_block(in_channels*2, 64))
+        layers.extend(discriminator_block(64, 128))
+        layers.extend(discriminator_block(128, 256))
+        layers.extend(discriminator_block(256, 512))
+        layers.append(nn.Conv2d(512, 1, 4, padding=0))
+        self.model = nn.Sequential(*layers)
+
+    def forward(self, img_A, img_B):
+        # Concatenate image and condition image by channels to produce input
+        img_input = torch.cat((img_A, img_B), 1)
         return self.model(img_input)
 
 
-# + id="99IcSN3H4nDw" colab={"base_uri": "https://localhost:8080/", "height": 391} outputId="1e410849-bb9a-438b-e9cf-5997db6c4d4b"
+# + [code]
 # Summary of the discriminator
 D = Discriminator().cuda()
 summary(D, [(1, 64, 64), (1, 64, 64)])
 
-# %% [markdown]
+# + [markdown]
 # # 2. Training our conditional GAN
 #
 # Now that we have created our generator and our discriminator, we have to
@@ -344,15 +409,13 @@ summary(D, [(1, 64, 64), (1, 64, 64)])
 #         # Compute the loss for the discriminator and perform one optimization step
 # ```
 
-# + id="SmezSS4UCXoL" cellView="form" colab={"base_uri": "https://localhost:8080/", "height": 74} outputId="9597f4cb-25b6-4ceb-c919-632833f769f8"
-#@title
-# %%html
-<div style='background-color:rgba(80,255,80,0.4); padding:20px'>
-  <b>Exercise</b>: We provide below a template to train our conditional GAN
-  on the dataset. Fill in the missing parts and look at the generated images.
-</div>
+# + [markdown]
+# <div class="alert alert-block alert-info">
+#  <b>Exercise</b>: We provide below a template to train our conditional GAN
+#  on the dataset. Fill in the missing parts and look at the generated images.
+# </div>
 
-
+# + [code]
 def train(train_loader, test_loader, num_epoch=500,
           lr=0.0001, beta1=0.9, beta2=0.999):
     """
@@ -438,14 +501,18 @@ def train(train_loader, test_loader, num_epoch=500,
             optimizer_G.zero_grad()
 
             # GAN loss
-            ...
-            loss_GAN = ...
-            loss_pixel = ...
+            fake_B = generator(real_A)
+            pred_fake = discriminator(fake_B, real_A)
+            loss_GAN = criterion_GAN(pred_fake, valid)
+
+            # L1 loss
+            loss_pixel = criterion_pixelwise(fake_B, real_B)
 
             # Total loss
-            loss_G = lambda_GAN * loss_GAN + lambda_pixel * loss_pixel
+            loss_G = loss_GAN + lambda_pixel * loss_pixel
 
             loss_G.backward()
+
             optimizer_G.step()
 
             # ---------------------
@@ -455,12 +522,12 @@ def train(train_loader, test_loader, num_epoch=500,
             optimizer_D.zero_grad()
 
             # Real loss
-            ...
-            loss_real = ... # loss on real inputs
+            pred_real = discriminator(real_B, real_A)
+            loss_real = criterion_GAN(pred_real, valid)
 
             # Fake loss
-            ...
-            loss_fake = ... # loss on generated inputs
+            pred_fake = discriminator(fake_B.detach(), real_A)
+            loss_fake = criterion_GAN(pred_fake, fake)
 
             # Total loss
             loss_D = 0.5 * (loss_real + loss_fake)
@@ -501,9 +568,7 @@ def train(train_loader, test_loader, num_epoch=500,
 
     return generator
 
-# + id="uv48odyq4tUA" colab={"base_uri": "https://localhost:8080/", "height": 51} outputId="2f16e86a-c8be-4cfc-b61b-ec833067a58a"
-root = "./IXI-dataset/size64/"
-
+# + [code]
 # Parameters for Adam optimizer
 lr = 0.0002
 beta1 = 0.5
@@ -524,7 +589,7 @@ num_epoch = 20
 generator = train(train_loader, test_loader, num_epoch=num_epoch,
                   lr=lr, beta1=beta1, beta2=beta2)
 
-import matplotlib.pyplot as plt
+# + [code]
 import matplotlib.image as img
 
 
@@ -536,7 +601,7 @@ plt.imshow(np.swapaxes(im, 0, 1))
 plt.gca().invert_yaxis()
 plt.show()
 
-# %% [markdown]
+# + [markdown]
 # # 3. Evaluating the quality of the generated images
 #
 # After doing visual quality control, it is a good idea to quantify the quality
@@ -557,26 +622,65 @@ plt.show()
 # To better understand the differences between these metrics:
 # https://www.pyimagesearch.com/2014/09/15/python-compare-two-images/
 
-# + id="QMnEX2hUI5X7" cellView="form" colab={"base_uri": "https://localhost:8080/", "height": 91} outputId="8d1c4c36-eeee-489d-d923-8d17cd023835"
-#@title
-# %%html
-<div style='background-color:rgba(80,255,80,0.4); padding:20px'>
-  <b>Exercise</b>: Define a function for each metric mentioned above and
-  evaluate the quality of the generated images on the training and test
-  sets. Compute the metrics for each image individually and find the best
-  and worst generated images according to these metrics.
-</div>
+# + [markdown]
+# <div class="alert alert-block alert-info">
+#  <b>Exercise</b>: Define a function for each metric mentioned above and
+#  evaluate the quality of the generated images on the training and test
+#  sets. Compute the metrics for each image individually and find the best
+#  and worst generated images according to these metrics.
+# </div>
 
+# + [code]
 def MSE(image_true, image_generated):
-    # TODO
+    """Compute mean squared error.
+
+    Args:
+        image_true: (Tensor) true image
+        image_generated: (Tensor) generated image
+
+    Returns:
+        mse: (float) mean squared error
+    """
+    return ((image_true - image_generated) ** 2).mean()
+
 
 def PSNR(image_true, image_generated):
-    # TODO
+    """"Compute peak signal-to-noise ratio.
+
+    Args:
+        image_true: (Tensor) true image
+        image_generated: (Tensor) generated image
+
+    Returns:
+        psnr: (float) peak signal-to-noise ratio"""
+    mse = MSE(image_true, image_generated).cpu()
+    return -10 * np.log10(mse)
+
 
 def SSIM(image_true, image_generated, C1=0.01, C2=0.03):
-    # TODO
+    """Compute structural similarity index.
 
+    Args:
+        image_true: (Tensor) true image
+        image_generated: (Tensor) generated image
+        C1: (float) variable to stabilize the denominator
+        C2: (float) variable to stabilize the denominator
 
+    Returns:
+        ssim: (float) mean squared error"""
+    mean_true = image_true.mean()
+    mean_generated = image_generated.mean()
+    std_true = image_true.std()
+    std_generated = image_generated.std()
+    covariance = (
+        (image_true - mean_true) * (image_generated - mean_generated)).mean()
+
+    numerator = (2 * mean_true * mean_generated + C1) * (2 * covariance + C2)
+    denominator = ((mean_true ** 2 + mean_generated ** 2 + C1) *
+                   (std_true ** 2 + std_generated ** 2 + C2))
+    return numerator / denominator
+
+# + [code]
 import pandas as pd
 
 
@@ -603,6 +707,7 @@ def compute_metrics(dataloader):
     df = pd.DataFrame(res, columns=['MSE', 'PSNR', 'SSIM'])
     return df
 
+# + [code]
 train_loader = DataLoader(
     MvaDataset(root=root, mode="train"),
     batch_size=1,
@@ -618,6 +723,8 @@ test_dataloader = DataLoader(
 df_train = compute_metrics(train_loader)
 df_test = compute_metrics(test_loader)
 
+# + [code]
 df_train
 
+# + [code]
 df_test
