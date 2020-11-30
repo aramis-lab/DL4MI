@@ -46,7 +46,7 @@ from copy import deepcopy
 # + id="XJ9xFm1nt4ed" colab={"base_uri": "https://localhost:8080/", "height": 156} outputId="7a6f62f2-b3c5-4e73-9a03-fedfe536f018"
 # ! git clone https://github.com/14thibea/OASIS-1_dataset.git
 
-# [markdown]
+# %% [markdown]
 # One crucial step before training a neural network is to check the dataset.
 # Are the classes balanced? Are there biases in the dataset that may
 # differentiate the labels?
