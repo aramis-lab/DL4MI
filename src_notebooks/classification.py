@@ -12,13 +12,15 @@
 #     name: python3
 # ---
 
-# + [markdown] id="OgplfJGysehS"
+# %% [markdown]
 # # Classification of Alzheimer's disease diagnosis
 #
-# The goal of this lab session is to train a network that will perform a binary classification between control participants and patients that are affected by Alzheimer's disease. The input of the network is a neuroimaging modality: the T1 weighted MRI. In this project we use the [pytorch library](https://pytorch.org/).
+# The goal of this lab session is to train a network that will perform a binary
+# classification between control participants and patients that are affected by
+# Alzheimer's disease. The input of the network is a neuroimaging modality: the
+# T1 weighted MRI. In this project we use the [pytorch
+# library](https://pytorch.org/).
 #
-
-# + id="S1Q0mTbro-EW"
 import torch
 import numpy as np
 import pandas as pd
@@ -29,25 +31,34 @@ from torchvision import transforms
 import random
 from copy import deepcopy
 
-# + [markdown] id="2zUJS1UEsj6C"
+# %% [markdown]
 # ## Database
 #
-# In this session we use the images from a public research project: [OASIS-1](https://www.oasis-brains.org/#data).
+# In this session we use the images from a public research project:
+# [OASIS-1](https://www.oasis-brains.org/#data).
 # Two labels exist in this dataset:
 # - CN (Cognitively Normal) for healthy participants.
 # - AD (Alzheimer's Disease) for patients affected by Alzheimer's disease.
 #
-# All the preprocessed images we use were put on github, run the following command to download them.
+# All the preprocessed images we use were put on github, run the following
+# command to download them.
 
 # + id="XJ9xFm1nt4ed" colab={"base_uri": "https://localhost:8080/", "height": 156} outputId="7a6f62f2-b3c5-4e73-9a03-fedfe536f018"
 # ! git clone https://github.com/14thibea/OASIS-1_dataset.git
 
-# + [markdown] id="3fy5DVT7mtAs"
-# One crucial step before training a neural network is to check the dataset. Are the classes balanced? Are there biases in the dataset that may differentiate the labels?
+# [markdown]
+# One crucial step before training a neural network is to check the dataset.
+# Are the classes balanced? Are there biases in the dataset that may
+# differentiate the labels?
 #
-# Here we will focus on the demographics (age, sex and level of education) and two cognitive scores:
-# - The MMS (Mini Mental State), rated between 0 (no correct answer) to 30 (healthy subject).
-# - The CDR (Clinical Dementia Rating), that is null if the participant is non-demented and of 0.5, 1, 2 and 3 for very mild, mild, moderate and severe dementia, respectively.
+# Here we will focus on the demographics (age, sex and level of education) and
+# two cognitive scores:
+#
+# - The MMS (Mini Mental State), rated between 0 (no correct answer) to 30
+# (healthy subject).
+# - The CDR (Clinical Dementia Rating), that is null if the participant is
+# non-demented and of 0.5, 1, 2 and 3 for very mild, mild, moderate and severe
+# dementia, respectively.
 
 # + id="Moe2GRGkPyJJ" colab={"base_uri": "https://localhost:8080/", "height": 69} outputId="925a346b-36ff-41c9-8dd2-7e0a2b659595"
 # Load the complete dataset
@@ -90,17 +101,21 @@ def characteristics_table(df, merged_df):
 population_df = characteristics_table(OASIS_df, OASIS_df)
 print(population_df)
 
-# + [markdown] id="66NAk4C-spYh"
+# %% [markdown]
 # ## Preprocessing
 #
-# Theoretically, the main advantage of deep learning methods is to be able to work without extensive data preprocessing. However, as we have only a few images to train the network in this lab session, the preprocessing here is very extensive. More specifically, the images encountered:
+# Theoretically, the main advantage of deep learning methods is to be able to
+# work without extensive data preprocessing. However, as we have only a few
+# images to train the network in this lab session, the preprocessing here is
+# very extensive. More specifically, the images encountered:
+#
 # 1. Non-linear registration
 # 2. Segmentation of grey matter
 # 3. Conversion to tensor format (.pt)
 #
-# The preprocessed images all have the same size (121x145x121). You will find below a Dataset that allow to browse easily the database.
+# The preprocessed images all have the same size (121x145x121). You will find
+# below a Dataset that allow to browse easily the database.
 
-# + id="4j72nWXCrhjZ"
 from torch.utils.data import Dataset, DataLoader, sampler
 from os import path
 
@@ -144,13 +159,19 @@ class MRIDataset(Dataset):
         self.transform.eval()
 
 
-# + [markdown] id="2dCAujRQmI8Q"
-# To facilitate the training and avoid overfitting due to the limited amount of data, the network won't use the full image but only a part of the image (size 30x40x30) centered on a specific neuroanatomical region: the hippocampus (HC).
-# This structure is known to be linked to memory, and is atrophied in the majority of cases of Alzheimer's disease patients.
+# %% [markdown]
+# To facilitate the training and avoid overfitting due to the limited amount of
+# data, the network won't use the full image but only a part of the image (size
+# 30x40x30) centered on a specific neuroanatomical region: the hippocampus
+# (HC).
+# This structure is known to be linked to memory, and is atrophied in the
+# majority of cases of Alzheimer's disease patients.
 #
-# To improve the training and reduce overfitting, a random shift was added to the cropping function. This means that the bounding box around the hippocampus may be shifted by a limited amount of voxels in each of the three directions.
+# To improve the training and reduce overfitting, a random shift was added to
+# the cropping function. This means that the bounding box around the
+# hippocampus may be shifted by a limited amount of voxels in each of the three
+# directions.
 
-# + id="ypEhnqxVpRlY"
 class CropLeftHC(object):
     """Crops the left hippocampus of a MRI non-linearly registered to MNI"""
     def __init__(self, random_shift=0):
@@ -196,7 +217,7 @@ class CropRightHC(object):
         self.train_mode = False
 
 
-# + [markdown] id="H3JoArkK9tIw"
+# %% [markdown]
 # ## Visualization
 #
 # Here we visualize the raw, preprocessed and cropped data.
@@ -241,10 +262,14 @@ show_slices([slice_0, slice_1, slice_2])
 plt.suptitle('Center slices of left HC of subject %s' % subject)
 plt.show()
 
-# + [markdown] id="aR78M-HyZPCX"
+# %% [markdown]
 # # Cross-validation
 #
-# In order to choose hyperparameters the set of images is divided into a training set (80%) and a validation set (20%). The data split was performed in order to ensure a similar distribution of diagnosis, age and sex between the subjects of the training set and the subjects of the validation set. Moreover the MMS distribution of each class is preserved.
+# In order to choose hyperparameters the set of images is divided into a
+# training set (80%) and a validation set (20%). The data split was performed
+# in order to ensure a similar distribution of diagnosis, age and sex between
+# the subjects of the training set and the subjects of the validation set.
+# Moreover the MMS distribution of each class is preserved.
 
 # + id="2v9DDGoQcFy0" colab={"base_uri": "https://localhost:8080/", "height": 173} outputId="b5b69fac-fb03-45dc-8ce3-2434b03b91ba"
 train_df = pd.read_csv('OASIS-1_dataset/tsv_files/lab_1/train.tsv', sep='\t')
@@ -258,25 +283,33 @@ print()
 print("Validation")
 print(valid_population_df)
 
-# + [markdown] id="Ini6UfC2SoEn"
+# %% [markdown]
 # # Model
-# We propose here to design a convolutional neural network that takes for input a patch centered on the left hippocampus of size 30x40x30. The architecture of the network was found using a Random Search on architecture + optimization hyperparameters.
+# We propose here to design a convolutional neural network that takes for input
+# a patch centered on the left hippocampus of size 30x40x30. The architecture
+# of the network was found using a Random Search on architecture + optimization
+# hyperparameters.
 #
 
 # + [markdown] id="484-30ZSd8CT"
 # ## Reminder on CNN layers
 #
-# In a CNN everything is called a layer though the operations layers perform are very different. You will find below a summary of the different operations that may be performed in a CNN.
+# In a CNN everything is called a layer though the operations layers perform
+# are very different. You will find below a summary of the different operations
+# that may be performed in a CNN.
 #
 
-# + [markdown] id="Nt_5UpLIiTzM"
+# %% [markdown]
 # ### Feature maps
 #
-# The outputs of the layers in a convolutional network are called feature maps. Their size is written with the format: 
+# The outputs of the layers in a convolutional network are called feature maps.
+# Their size is written with the format: 
 #
 # > `n_channels @ dim1 x dim2 x dim3`
 #
-# For a 3D CNN the dimension of the feature maps is actually 5D as the first dimension is the batch size. This dimension is added by the `DataLoader` of pytorch which stacks the 4D tensors computed by a `Dataset`.
+# For a 3D CNN the dimension of the feature maps is actually 5D as the first
+# dimension is the batch size. This dimension is added by the `DataLoader` of
+# pytorch which stacks the 4D tensors computed by a `Dataset`.
 
 # + id="x1VVZU27iXCR" colab={"base_uri": "https://localhost:8080/", "height": 104} outputId="42b88c8e-a286-4501-c1ed-bb71788ab862"
 img_dir = path.join('OASIS-1_dataset', 'preprocessed')
@@ -291,13 +324,19 @@ print("Shape of Dataset output\n", example_dataset[0]['image'].shape)
 print()
 print("Shape of DataLoader output\n", data['image'].shape)
 
-# + [markdown] id="GK_IkxwliGve"
+# %% [markdown]
 #
 # ### Convolutions (`nn.Conv3d`)
 #
-# The main arguments of this layer are the input channels, the output channels (number of filters trained) and the size of the filter (or kernel). If an integer `k` is given the kernel will be a cube of size `k`. It is possible to construct rectangular kernels by entering a tuple (but this is very rare).
+# The main arguments of this layer are the input channels, the output channels
+# (number of filters trained) and the size of the filter (or kernel). If an
+# integer `k` is given the kernel will be a cube of size `k`. It is possible to
+# construct rectangular kernels by entering a tuple (but this is very rare).
 #
-# You will find below an illustration of how a single filter produces its output feature map by parsing the one feature map. The size of the output feature map produced depends of the convolution parameters and can be computed with the following formula:
+# You will find below an illustration of how a single filter produces its
+# output feature map by parsing the one feature map. The size of the output
+# feature map produced depends of the convolution parameters and can be
+# computed with the following formula:
 #
 # > $O_i = \frac{I_i-k+2P}{S} + 1$
 #
@@ -311,9 +350,14 @@ print("Shape of DataLoader output\n", data['image'].shape)
 #
 # ![2D convolutional layer gif](https://drive.google.com/uc?id=166EuqiwIZkKPMOlVzA-v5WemJE2tDCES) 
 #
-# To be able to parse all the feature maps of the input, one filter is actually a 4D tensor of size `(input_channels, k, k, k)`. The ensemble of all the filters included in one convolutional layer is then a 5D tensor stacking all the filters of size `(output_channels, input_channels, k, k, k)`.
+# To be able to parse all the feature maps of the input, one filter is actually
+# a 4D tensor of size `(input_channels, k, k, k)`. The ensemble of all the
+# filters included in one convolutional layer is then a 5D tensor stacking all
+# the filters of size `(output_channels, input_channels, k, k, k)`.
 #
-# Each filter is also associated to one bias value that is a scalar added to all the feature maps it produces. Then the bias is a 1D vector of size `output_channels`.
+# Each filter is also associated to one bias value that is a scalar added to
+# all the feature maps it produces. Then the bias is a 1D vector of size
+# `output_channels`.
 
 # + id="ETjl7kp17-IM" colab={"base_uri": "https://localhost:8080/", "height": 104} outputId="6b2987dd-850c-4598-fe3d-b8cb20a81e4b"
 from torch import nn
@@ -323,10 +367,12 @@ print('Weights shape\n', conv_layer.weight.shape)
 print()
 print('Bias shape\n', conv_layer.bias.shape)
 
-# + [markdown] id="hpcq2Ejb9Jj_"
+# %% [markdown]
 # ### Batch Normalization (`nn.BatchNorm3d`)
 #
-# Learns to normalize feature maps according to [(Ioffe & Szegedy, 2015)](https://arxiv.org/abs/1502.03167). The following formula is applied on each feature map  $FM_i$:
+# Learns to normalize feature maps according to [(Ioffe & Szegedy,
+# 2015)](https://arxiv.org/abs/1502.03167). The following formula is applied on
+# each feature map  $FM_i$:
 #
 # > $FM^{normalized}_i = \frac{FM_i - mean(FM_i)}{\sqrt{var(FM_i) + \epsilon}} * \gamma_i + \beta_i$
 #
@@ -334,7 +380,9 @@ print('Bias shape\n', conv_layer.bias.shape)
 # *   $\gamma_i$ is the value of the scale for the ith channel (learnable parameter)
 # *   $\beta_i$ is the value of the shift for the ith channel (learnable parameter)
 #
-# This layer does not have the same behaviour during training and evaluation, this is why it is needed to put the model in evaluation mode in the test function with the command `.eval()`
+# This layer does not have the same behaviour during training and evaluation,
+# this is why it is needed to put the model in evaluation mode in the test
+# function with the command `.eval()`
 
 # + id="8QPASZehDHjc" colab={"base_uri": "https://localhost:8080/", "height": 104} outputId="6b9218de-4d3f-48fc-fb3f-63343f47f843"
 batch_layer = nn.BatchNorm3d(16)
@@ -343,30 +391,36 @@ print()
 print('Beta value\n', batch_layer.state_dict()['bias'].shape)
 
 
-# + [markdown] id="m4TxeR3lEZeI"
+# %% [markdown]
 # ### Activation function (`nn.LeakyReLU`)
 #
-# In order to introduce non-linearity in the model, an activation function is introduced after the convolutions. It is applied on all intensities independently.
+# In order to introduce non-linearity in the model, an activation function is
+# introduced after the convolutions. It is applied on all intensities
+# independently.
 #
-# The graph of the Leaky ReLU is displayed below, $\alpha$ being a hyperparameter of the layer (default=0.01):
+# The graph of the Leaky ReLU is displayed below, $\alpha$ being a
+# hyperparameter of the layer (default=0.01):
 #
 # ![Leaky ReLU graph](https://sefiks.com/wp-content/uploads/2018/02/prelu.jpg?w=600)
 
-# + [markdown] id="O3Oflm0QGHHG"
+# %% [markdown]
 # ### Pooling function (`PadMaxPool3d`)
 #
-# The structure of the pooling layer is very similar to the convolutional layer: a kernel is passing through the input with a defined size and stride. However there is no learnable parameters in this layer, the kernel outputing the maximum value of the part of the feature map it covers.
+# The structure of the pooling layer is very similar to the convolutional
+# layer: a kernel is passing through the input with a defined size and stride.
+# However there is no learnable parameters in this layer, the kernel outputing
+# the maximum value of the part of the feature map it covers.
 #
 # Here is an example in 2D of the standard layer of pytorch `nn.MaxPool2d`:
 #
 # ![nn.MaxPool2d behaviour](https://drive.google.com/uc?id=1qh9M9r9mfpZeSD1VjOGQAl8zWqBLmcKz)
 #
-# We can observe that the last column may not be used depending on the size of the kernel/input and stride value.
+# We can observe that the last column may not be used depending on the size of
+# the kernel/input and stride value.
 #
-# This is why the custom module `PadMaxPool` was defined to pad the input in order to exploit information from the whole feature map.
+# This is why the custom module `PadMaxPool` was defined to pad the input in
+# order to exploit information from the whole feature map.
 #
-
-# + id="U_1xH8eOiNAk"
 class PadMaxPool3d(nn.Module):
     """A MaxPooling module which deals with odd sizes with padding"""
     def __init__(self, kernel_size, stride, return_indices=False, return_pad=False):
@@ -408,8 +462,9 @@ class PadMaxPool3d(nn.Module):
                 return output
 
 
-# + [markdown] id="V7iEpyGdLHyF"
-# Here is an illustration of `PadMaxPool` behaviour, a column is added to avoid losing data:
+# %% [markdown]
+# Here is an illustration of `PadMaxPool` behaviour, a column is added to avoid
+# losing data:
 #
 # ![PadMaxPool behaviour](https://drive.google.com/uc?id=14R_LCTiV0N6ZXm-3wQCj_Gtc1LsXdQq_)
 #
@@ -417,12 +472,15 @@ class PadMaxPool3d(nn.Module):
 #
 # > $O_i = ceil(\frac{I_i-k+2P}{S}) + 1$
 
-# + [markdown] id="p-65jRniEjr2"
+# + [markdown]
 # ### Dropout (`nn.Dropout`)
 #
-# The aim of a dropout layer is to replace a fixed proportion of the input values by 0 during training only.
+# The aim of a dropout layer is to replace a fixed proportion of the input
+# values by 0 during training only.
 #
-# This layer does not have the same behaviour during training and evaluation, this is why it is needed to put the model in evaluation mode in the test function with the command `.eval()`
+# This layer does not have the same behaviour during training and evaluation,
+# this is why it is needed to put the model in evaluation mode in the test
+# function with the command `.eval()`
 
 # + id="-0O3cCR7HGge" colab={"base_uri": "https://localhost:8080/", "height": 139} outputId="5e09b0ea-b9ae-42c5-f390-b51f4a8b07e5"
 dropout = nn.Dropout(0.5)
@@ -432,12 +490,15 @@ print("Input \n", input_tensor)
 print()
 print("Output \n", output_tensor)
 
-# + [markdown] id="2hL2TdAnE-jn"
+# %% [markdown]
 # ### Fully-Connected Layers (`nn.Linear`)
 #
-# The fully connected layers take as input 2D vectors of size `(batch_size, N)`. They have two mandatory arguments, the number of values per batch of the input and the number of values per batch of the output.
+# The fully connected layers take as input 2D vectors of size `(batch_size,
+# N)`. They have two mandatory arguments, the number of values per batch of the
+# input and the number of values per batch of the output.
 #
-# Each output neuron in a FC layer is a linear combination of the inputs + a bias.
+# Each output neuron in a FC layer is a linear combination of the inputs + a
+# bias.
 
 # + id="um2OupjmGy94" colab={"base_uri": "https://localhost:8080/", "height": 104} outputId="42ef6dec-e7d5-40a5-8547-5d682afa539e"
 fc = nn.Linear(16, 2)
@@ -446,11 +507,12 @@ print()
 print("Bias shape \n", fc.bias.shape)
 
 
-# + [markdown] id="KtVTPk04geLz"
-# The max pooling module of pytorch does not deal with odd sizes, indeed when the size is not a multiple of the stride (here 2) the last column is thrown.
-# To avoid this we use a custom module `PadMaxPool3d` instead of the standard module `nn.MaxPooling3d`.
+# %% [markdown]
+# The max pooling module of pytorch does not deal with odd sizes, indeed when
+# the size is not a multiple of the stride (here 2) the last column is thrown.
+# To avoid this we use a custom module `PadMaxPool3d` instead of the standard
+# module `nn.MaxPooling3d`.
 
-# + id="tRTnZ2KUtANd"
 class PadMaxPool3d(nn.Module):
     """A MaxPooling module which deals with odd sizes with padding"""
     def __init__(self, kernel_size, stride, return_indices=False, return_pad=False):
@@ -492,17 +554,22 @@ class PadMaxPool3d(nn.Module):
                 return output
 
 
-# + [markdown] id="lQ7jwdu6hBCz"
+# %% [markdown]
 # ## TODO Network design
-# Construct here the network corresponding to the scheme and the following description:
+# Construct here the network corresponding to the scheme and the following
+# description:
 #
 # ![Scheme of the network](https://drive.google.com/uc?id=1Qi-ictqudBX4ToBXzqT5w57RHrkn3MPR)
 #
-# The network includes 3 convolutional blocks composed by a convolutional layer (kernel size = 3, padding = 1, stride = 1), a batch normalization, a LeakyReLU activation and a MaxPooling layer. The 3 successive layers include respectively 8, 16 and 32 filters.
+# The network includes 3 convolutional blocks composed by a convolutional layer
+# (kernel size = 3, padding = 1, stride = 1), a batch normalization, a
+# LeakyReLU activation and a MaxPooling layer. The 3 successive layers include
+# respectively 8, 16 and 32 filters.
 #
-# Then, the feature maps array is flattened in a 1D array to enter a fully-connected layer. Between the convolutional and the fully-connected layers, a dropout layer with a dropout rate of 0.5 is inserted. 
+# Then, the feature maps array is flattened in a 1D array to enter a
+# fully-connected layer. Between the convolutional and the fully-connected
+# layers, a dropout layer with a dropout rate of 0.5 is inserted. 
 
-# + id="lfUuXbUtg_W4"
 class CustomNetwork(nn.Module):
     
     def __init__(self):
@@ -515,17 +582,26 @@ class CustomNetwork(nn.Module):
         pass
 
 
-# + [markdown] id="W2SW0XToZTfK"
+# %% [markdown]
 # # Train & Test
-
-# + [markdown] id="314vYQgsoZHb"
-# Complete the `train` method in order to iteratively update the weights of the network.
 #
-# Here the model leading to the lowest loss on the training set at the end of an epoch is returned, however we could choose instead the model leading to the highest balanced accuracy, or the one obtained at the last iteration.
+# Complete the `train` method in order to iteratively update the weights of the
+# network.
 #
-# In many studies of deep learning the validation set is used during training to choose when the training should stop (early stopping) but also to retrieve the best model (model selection).
+# Here the model leading to the lowest loss on the training set at the end of
+# an epoch is returned, however we could choose instead the model leading to
+# the highest balanced accuracy, or the one obtained at the last iteration.
 #
-# As we don't have any test set to evaluate the final model selected in an unbiased way, we chose not to use the validation set in training in order to limit the bias of the validation set. However you can choose to implement an early stopping and / or model selection based on the validation set, but remember that even if your results on the validation set are better, that doesn't mean that this would be the case on an independent test set.
+# In many studies of deep learning the validation set is used during training
+# to choose when the training should stop (early stopping) but also to retrieve
+# the best model (model selection).
+#
+# As we don't have any test set to evaluate the final model selected in an
+# unbiased way, we chose not to use the validation set in training in order to
+# limit the bias of the validation set. However you can choose to implement an
+# early stopping and / or model selection based on the validation set, but
+# remember that even if your results on the validation set are better, that
+# doesn't mean that this would be the case on an independent test set.
 
 # + id="1yVfkO-QvzfM" colab={"base_uri": "https://localhost:8080/", "height": 130} outputId="ff6c9524-cdba-4894-938e-0a2d94609f12"
 def train(model, train_loader, criterion, optimizer, n_epochs):
@@ -634,15 +710,22 @@ def compute_metrics(ground_truth, prediction):
 
 
 
-# + [markdown] id="spF8eq2pcGC_"
+# %% [markdown]
 # ## Train Classification with Left HC
-# Here we will train a first network that will learn to perform the binary classification AD vs CN on a cropped image around the left hippocampus.
 #
-# All hyperparameters may have an influence, but one of the most influent is the learning rate that can lead to a poor convergence if it is too high or low. Try different learning rate between $10 ^{-5}$ and $10 ^{-3}$ and observe the differences of loss variations during training.
+# Here we will train a first network that will learn to perform the binary
+# classification AD vs CN on a cropped image around the left hippocampus.
 #
-# To increase the training speed you can also increase the batch size. But be careful, if the batch size becomes a non-negligible amount of the training set it may have a negative impact on loss convergence [(Keskar et al, 2016)](https://arxiv.org/abs/1609.04836). 
-
-# + id="v8m28OMgrlLG"
+# All hyperparameters may have an influence, but one of the most influent is
+# the learning rate that can lead to a poor convergence if it is too high or
+# low. Try different learning rate between $10 ^{-5}$ and $10 ^{-3}$ and
+# observe the differences of loss variations during training.
+#
+# To increase the training speed you can also increase the batch size. But be
+# careful, if the batch size becomes a non-negligible amount of the training
+# set it may have a negative impact on loss convergence [(Keskar et al,
+# 2016)](https://arxiv.org/abs/1609.04836). 
+#
 # Construction of dataset objects
 
 img_dir = path.join('OASIS-1_dataset', 'preprocessed')
@@ -651,7 +734,6 @@ transform = CropLeftHC(2)
 train_datasetLeftHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetLeftHC = MRIDataset(img_dir, valid_df, transform=transform)
 
-# + id="29ATYIrqBA-S"
 # Try different learning rates
 learning_rate = ...
 n_epochs = 30
@@ -667,33 +749,38 @@ optimizer = torch.optim.Adam(modelLeftHC.parameters(), learning_rate)
 
 best_modelLeftHC = train(modelLeftHC, train_loaderLeftHC, criterion, optimizer, n_epochs)
 
-# + id="QSUNvljvEqV6"
 valid_resultsLeftHC_df, valid_metricsLeftHC = test(best_modelLeftHC, valid_loaderLeftHC, criterion)
 train_resultsLeftHC_df, train_metricsLeftHC = test(best_modelLeftHC, train_loaderLeftHC, criterion)
 print(valid_metricsLeftHC)
 print(train_metricsLeftHC)
 
-# + [markdown] id="CF2THdj7cyyM"
-# If you obtained about 0.85 or more of balanced accuracy, there may be something wrong... Are you absolutely sure that your dataset is unbiased?
+# %% [markdown]
+# If you obtained about 0.85 or more of balanced accuracy, there may be
+# something wrong... Are you absolutely sure that your dataset is unbiased?
 #
-# If you didn't remove the youngest subjects of OASIS, your dataset is biased as the AD and CN participants do not have the same age distribution.
-# In practice people who come to the hospital for a diagnosis of Alzheimer's disease all have about the same age (50 - 90). No one has Alzheimer's disease at 20 ! Then you should check that the performance of the network is still good for the old population only.
+# If you didn't remove the youngest subjects of OASIS, your dataset is biased
+# as the AD and CN participants do not have the same age distribution.
+# In practice people who come to the hospital for a diagnosis of Alzheimer's
+# disease all have about the same age (50 - 90). No one has Alzheimer's disease
+# at 20 ! Then you should check that the performance of the network is still
+# good for the old population only.
 
-# + id="t2ITftTejjfC"
-# Check accuracy of old participants (age > 62 to match the minimum of AD age distribution)
+# Check accuracy of old participants (age > 62 to match the minimum of AD age
+# distribution)
 valid_resultsLeftHC_df = valid_resultsLeftHC_df.merge(OASIS_df, how='left', on='participant_id', sort=False)
 valid_resultsLeftHC_old_df = valid_resultsLeftHC_df[(valid_resultsLeftHC_df.age_bl_x >= 62)]
 compute_metrics(valid_resultsLeftHC_old_df.true_label, valid_resultsLeftHC_old_df.predicted_label)
 
-# + [markdown] id="WiOML2OWkZpa"
-# If this is not the case, you have to think again about your framework and eventually retrain your network...
+# %% [markdown]
+# If this is not the case, you have to think again about your framework and
+# eventually retrain your network...
 
-# + [markdown] id="ph3Lc8iVbzjk"
+# %%[markdown]
 # ## Train Classification with Right HC
 #
-# Another network can be trained on a cropped image around the right HC network. The same hyperparameters as before may be reused.
-
-# + id="Q-OQfVOKbLv5"
+# Another network can be trained on a cropped image around the right HC
+# network. The same hyperparameters as before may be reused.
+#
 # Construction of dataset objects
 
 transform = CropRightHC(2)
@@ -701,7 +788,6 @@ transform = CropRightHC(2)
 train_datasetRightHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetRightHC = MRIDataset(img_dir, valid_df, transform=transform)
 
-# + id="wtdlN9mVc14I"
 learning_rate = ...
 n_epochs = 30
 batch_size = 4
@@ -715,7 +801,6 @@ optimizer = torch.optim.Adam(modelRightHC.parameters(), learning_rate)
 
 best_modelRightHC = train(modelRightHC, train_loaderRightHC, criterion, optimizer, n_epochs)
 
-# + id="FDgEniPndCfB"
 valid_resultsRightHC_df, valid_metricsRightHC = test(best_modelRightHC, valid_loaderRightHC, criterion)
 train_resultsRightHC_df, train_metricsRightHC = test(best_modelRightHC, train_loaderRightHC, criterion)
 print(valid_metricsRightHC)
@@ -724,9 +809,9 @@ print(train_metricsRightHC)
 
 # + [markdown] id="4DrQZBkufKM-"
 # ## Soft voting
-# To increase the accuracy of our system the results of the two networks can be combined. Here we can give both hippocampi the same weight.
+# To increase the accuracy of our system the results of the two networks can be
+# combined. Here we can give both hippocampi the same weight.
 
-# + id="MgXu-qrUg-aq"
 def softvoting(df1, df2):
     df1 = df1.set_index('participant_id', drop=True)
     df2 = df2.set_index('participant_id', drop=True)
@@ -742,36 +827,44 @@ def softvoting(df1, df2):
     return results_df
 
 
-# + id="d3hEzAKMe0pe"
 valid_results = softvoting(valid_resultsLeftHC_df, valid_resultsRightHC_df)
 valid_metrics = compute_metrics(valid_results.true_label, valid_results.predicted_label)
 print(valid_metrics)
 
 
-# + [markdown] id="ucoIR5icuhj9"
-# Keep in mind that the validation set was used to set the hyperparameters (learning rate, architecture), then validation metrics are biased. To have unbiased results the entire framework should be evaluated when all the hyperparameters are set on an independent set (test set).
+# %% [markdown]
+# Keep in mind that the validation set was used to set the hyperparameters
+# (learning rate, architecture), then validation metrics are biased. To have
+# unbiased results the entire framework should be evaluated when all the
+# hyperparameters are set on an independent set (test set).
 
-# + [markdown] id="hjpxuDese-HZ"
+# %% [markdown]
 # # Clustering on AD & CN populations
-
-# + [markdown] id="nY7Nd_Uuwa2j"
-# The classification results above were obtained in a supervised way: neurologists examine the participants of OASIS and gave a diagnosis depending on their clinical symptoms.
+#
+# The classification results above were obtained in a supervised way:
+# neurologists examine the participants of OASIS and gave a diagnosis depending
+# on their clinical symptoms.
 #
 # However, this label is often inaccurate (Beach et al, 2012).
-# Then an unsupervised framework can be interesting to check what can be found in data without being biased by a noisy label.
+# Then an unsupervised framework can be interesting to check what can be found
+# in data without being biased by a noisy label.
 
-# + [markdown] id="bQu1bMukTBPF"
+# %% [markdown]
 # ## Model
+#
+# A convenient architecture to extract features from an image with deep
+# learning is the autoencoder (AE). This architecture is made of two parts:
+# - the **encoder** which learns to compress the image in a smaller vector, the
+# **code**. *It is composed of the same kind of operations than the
+# convolutional part of the CNN seen before.*
+# - the **decoder** which learns to reconstruct the original image from the
+# code learnt by the encoder. *It is composed of the transposed version of the
+# operations used in the encoder.*
 
-# + [markdown] id="VJZ2F8TRZamU"
-# A convenient architecture to extract features from an image with deep learning is the autoencoder (AE). This architecture is made of two parts:
-# - the **encoder** which learns to compress the image in a smaller vector, the **code**. *It is composed of the same kind of operations than the convolutional part of the CNN seen before.*
-# - the **decoder** which learns to reconstruct the original image from the code learnt by the encoder. *It is composed of the transposed version of the operations used in the encoder.*
+# %% [markdown]
+# You will find below `CropMaxUnpool3d` the transposed version of
+# `PadMaxPool3d`.
 
-# + [markdown] id="37ofc_m9anCG"
-# You will find below `CropMaxUnpool3d` the transposed version of `PadMaxPool3d`.
-
-# + id="mid9oL35Pe_0"
 class CropMaxUnpool3d(nn.Module):
     def __init__(self, kernel_size, stride):
         super(CropMaxUnpool3d, self).__init__()
@@ -788,10 +881,14 @@ class CropMaxUnpool3d(nn.Module):
         return output
 
 
-# + [markdown] id="_yIhjxtnbGfP"
-# To facilitate the reconstruction process, the pooling layers in the encoder return the position of the values that were the maximum. Hence the unpooling layer can replace the maximum values at the right place in the 2x2x2 sub-cube of the feature map. They also indicate if some zero padding was applied to the feature map so that the unpooling layer can correctly crop their output feature map.  
+# %% [markdown]
+# To facilitate the reconstruction process, the pooling layers in the encoder
+# return the position of the values that were the maximum. Hence the unpooling
+# layer can replace the maximum values at the right place in the 2x2x2 sub-cube
+# of the feature map. They also indicate if some zero padding was applied to
+# the feature map so that the unpooling layer can correctly crop their output
+# feature map.  
 
-# + id="txunPzZtfHHM"
 class AutoEncoder(nn.Module):
     
     def __init__(self):
@@ -866,13 +963,15 @@ class AutoEncoder(nn.Module):
         return code, x
 
 
-# + [markdown] id="g8J2aq7SS5qr"
+# %% [markdown]
 # ## Train Autoencoder
+#
+# The training function of the autoencoder is very similar to the training
+# function of the CNN. The main difference is that the loss is not computed by
+# comparing the output with the diagnosis values using the cross-entropy loss,
+# but with the original image using for example the Mean Squared Error (MSE)
+# loss.
 
-# + [markdown] id="ZB5GtJYvccbc"
-# The training function of the autoencoder is very similar to the training function of the CNN. The main difference is that the loss is not computed by comparing the output with the diagnosis values using the cross-entropy loss, but with the original image using for example the Mean Squared Error (MSE) loss.
-
-# + id="6NEklXXGWpiF"
 def trainAE(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train an AutoEncoder
@@ -938,7 +1037,6 @@ def testAE(model, data_loader, criterion):
     return total_loss / len(data_loader.dataset) / np.product(data_loader.dataset.size)
 
 
-# + id="MZC8PW47S-P0"
 learning_rate = 10**-2
 n_epochs = 30
 batch_size = 4
@@ -949,13 +1047,12 @@ optimizer = torch.optim.Adam(AELeftHC.parameters(), learning_rate)
 
 best_AELeftHC = trainAE(AELeftHC, train_loaderLeftHC, criterion, optimizer, n_epochs)
 
-# + [markdown] id="GKaoKKSqZt4K"
+# %% [markdown]
 # ## Visualization
+#
+# The simplest way to check if the AE training went well is to visualize the
+# output and compare it to the original image seen by the autoencoder.
 
-# + [markdown] id="tjZCaWsmdX8c"
-# The simplest way to check if the AE training went well is to visualize the output and compare it to the original image seen by the autoencoder.
-
-# + id="DnoXZtBJZv2d"
 import matplotlib.pyplot as plt
 import nibabel as nib
 from scipy.ndimage import rotate
@@ -983,14 +1080,17 @@ plt.suptitle('Center slices of the output image of subject %s' % subject)
 plt.show()
 
 
-# + [markdown] id="_PjikQ_ld3mA"
+# %% [markdown]
 # ## Clustering
 #
-# Now that the AE extracted the most salient parts of the image in a smaller vector, the features obtained can be used for clustering.
+# Now that the AE extracted the most salient parts of the image in a smaller
+# vector, the features obtained can be used for clustering.
 #
-# Here we give an example with the Gaussian Mixture Model (GMM) of scikit-learn. To use it we first need to concat the features and the labels of all the subjects in two matrices *X* and *Y*. This is what is done in `compute_dataset_features` method.
+# Here we give an example with the Gaussian Mixture Model (GMM) of
+# scikit-learn. To use it we first need to concat the features and the labels
+# of all the subjects in two matrices *X* and *Y*. This is what is done in
+# `compute_dataset_features` method.
 
-# + id="nBev2V1keICt"
 def compute_dataset_features(data_loader, model):
 
     concat_codes = torch.Tensor().cuda()
@@ -1014,15 +1114,13 @@ def compute_dataset_features(data_loader, model):
     return concat_codes_np, concat_labels_np, concat_names
 
 
-# + id="e9u4efqmf45U"
 train_codes, train_labels, names = compute_dataset_features(train_loaderBothHC, best_AEBothHC)
 
-# + [markdown] id="1KotYvJtfdiw"
-# Then the model will fit the training codes and build two clusters. The labels found in this unsupervised way can be compared to the true labels.
+# %% [markdown]
+# Then the model will fit the training codes and build two clusters. The labels
+# found in this unsupervised way can be compared to the true labels.
 
-# + id="VTg2vKuDZwb4"
 from sklearn import mixture
-
 
 components = 2
 model = mixture.GaussianMixture(components)
@@ -1032,12 +1130,14 @@ Y_pred = model.predict(X)
 metrics = compute_metrics(Y, Y_pred)
 print(metrics)
 
-# + [markdown] id="IQrlzfmcf8cK"
-# The accuracy may not be very good, this could mean that the framework classified another characteristic that the one you tried to target.
+# %% [markdown]
+# The accuracy may not be very good, this could mean that the framework
+# classified another characteristic that the one you tried to target.
 #
-# What is actually expected is that the clustering differenciation is made on the level of atrophy, which is mostly correlated to the age but also to the disease stage (we can model it with the MMS score).
+# What is actually expected is that the clustering differenciation is made on
+# the level of atrophy, which is mostly correlated to the age but also to the
+# disease stage (we can model it with the MMS score).
 
-# + id="s7R9md2tgMIV"
 data_np = np.concatenate([names, train_codes,
                           train_labels[:, np.newaxis],
                           train_predict[:, np.newaxis]], axis=1)
@@ -1056,8 +1156,8 @@ plt.xlabel('age')
 plt.ylabel('MMS')
 plt.show()
 
-# + [markdown] id="u6zujwJw1cyd"
-# You can try to improve this clustering by adding the codes obtained on the right hippocampus, perform further dimension reduction or remove age effect like in [(Moradi et al, 2015)](https://www.researchgate.net/publication/266374876_Machine_learning_framework_for_early_MRI-based_Alzheimer%27s_conversion_prediction_in_MCI_subjects)...
-
-# + id="__GcC2Ql-57G"
-
+# %% [markdown] id="u6zujwJw1cyd"
+# You can try to improve this clustering by adding the codes obtained on the
+# right hippocampus, perform further dimension reduction or remove age effect
+# like in [(Moradi et al,
+# 2015)](https://www.researchgate.net/publication/266374876_Machine_learning_framework_for_early_MRI-based_Alzheimer%27s_conversion_prediction_in_MCI_subjects)...
