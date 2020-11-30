@@ -29,8 +29,7 @@
 
 # %% [markdown]
 # # 0. Fetching the dataset
-
-# + [markdown] id="JePGT61J5cVV"
+#
 # The dataset can be found on this
 # [GitHub repository](https://github.com/Easternwen/IXI-dataset).
 # In the `size64` folder, there are 1154 files: 2 images for 577 subjects.
@@ -79,7 +78,7 @@ plt.imshow(torch.load(os.path.join(root, 'sub-IXI002 - T2.pt')),
 plt.title("T2 slice for subject 002")
 plt.show()
 
-# %%
+# %% [markdown]
 from __future__ import print_function
 
 
