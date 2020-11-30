@@ -37,8 +37,8 @@
 #
 # Let's clone the repository and have a look at the data.
 
-# + id="KV3cmAW-3ULI" colab={"base_uri": "https://localhost:8080/"}
 # Get the dataset from the GitHub repository
+# 
 ! git clone https://github.com/Easternwen/IXI-dataset.git
 
 # %% [markdown]
@@ -57,7 +57,6 @@
 # + colab={"base_uri": "https://localhost:8080/"} id="538n0mwe7zCO" outputId="50748e0d-f8c7-4407-a0d4-cdf26834061e"
 # ! ls ./IXI-dataset/size64
 
-# + id="BTWQREI29Rmt" colab={"base_uri": "https://localhost:8080/", "height": 281} outputId="7b6c7a7f-057e-499b-d1fd-fbe7efabe2e8"
 import matplotlib.pyplot as plt
 import os
 import torch
