@@ -3,7 +3,7 @@
 #   jupytext:
 #     text_representation:
 #       extension: .py
-#       format_name: light
+#       format_name: percent
 #       format_version: '1.5'
 #       jupytext_version: 1.7.1
 #   kernelspec:
@@ -11,7 +11,7 @@
 #     name: python3
 # ---
 
-# + [markdown]
+# %% [markdown]
 # In this lab we will train a conditional generative adversarial network (cGAN)
 # to synthesize **T2-w MRI** from **T1-w MRI**.
 #
@@ -27,7 +27,7 @@
 # But first we will fetch the dataset and have a look at it to see what the
 # task looks like.
 
-# + [markdown]
+# %% [markdown]
 # # 0. Fetching the dataset
 #
 # The dataset can be found on this
@@ -37,11 +37,11 @@
 #
 # Let's clone the repository and have a look at the data.
 
-# + [code]
+# %%
 # Get the dataset from the GitHub repository
 ! git clone https://github.com/Easternwen/IXI-dataset.git
 
-# + [markdown]
+# %% [markdown]
 # The dataset used in this lab is composed of preprocessed images from the
 # [IXI dataset](https://brain-development.org/ixi-dataset/). Two different
 # structural MRI modalities are comprised in this dataset:
@@ -54,7 +54,7 @@
 # voxels are cancelled in T1 weighted imaging whereas they are highlighted by
 # the T2 weighted imaging.
 
-# + [code]
+# %%
 import matplotlib.pyplot as plt
 import os
 import torch
@@ -75,7 +75,7 @@ plt.imshow(torch.load(os.path.join(root, 'sub-IXI002 - T2.pt')),
 plt.title("T2 slice for subject 002")
 plt.show()
 
-# + [code]
+# %%
 from __future__ import print_function
 
 
@@ -95,13 +95,13 @@ import datetime
 import sys
 from torchvision.utils import save_image
 
-# + [markdown]
+# %% [markdown]
 # Let's create a custom `MvaDataset` class to easily have access to the data.
 # Here we don't use tsv files to split subjects between the training and the
 # test set. We only set the dataset to the `train` or `test` mode to access
 # training or test data.
 
-# + [code]
+# %%
 import os
 
 
@@ -152,7 +152,7 @@ class MvaDataset(torch.utils.data.Dataset):
         return len(self.imgs)
 
 
-# + [markdown]
+# %% [markdown]
 # Using this class and the `DataLoader` class from `torch.utils.data`, you can
 # easily have access to your dataset. Here is a quick example on how to use it:
 #
@@ -175,7 +175,7 @@ class MvaDataset(torch.utils.data.Dataset):
 #     # - batch["T2"] is a tensor with shape (batch_size, 64, 64) with the T2 images for the samples in this batch
 # ```
 
-# + [markdown]
+# %% [markdown]
 # # 1. Creating your conditional GAN
 #
 # ## 1.1 Generator = U-Net
@@ -190,16 +190,16 @@ class MvaDataset(torch.utils.data.Dataset):
 #
 # The parameters for each layer are given in the picture below.
 
-# + [markdown]
+# %% [markdown]
 # <a href="https://ibb.co/QXBDNy3"><img src="https://i.ibb.co/g614TkL/Capture-d-cran-2020-03-02-16-04-06.png" width="800" alt="Capture-d-cran-2020-03-02-16-04-06" border="0"></a>
 
-# + [markdown]
+# %% [markdown]
 # <div class="alert alert-block alert-info">
 # <b>Exercise</b>: Create a <code>GeneratorUNet</code> class to define the
 # generator with the architecture given above.
 # </div>
 
-# + [code]
+# %%
 # Define the blocks used for U-Net
 
 class UNetDown(nn.Module):
@@ -247,7 +247,7 @@ class FinalLayer(nn.Module):
         x = self.model(x)
         return x
 
-# + [code]
+# %%
 ##############################
 #      Generator U-NET
 ##############################
@@ -283,12 +283,12 @@ class GeneratorUNet(nn.Module):
 
         return self.final(u4, d1)
 
-# + [code]
+# %%
 # Summary of the generator
 G = GeneratorUNet().cuda()
 summary(G, (1, 64, 64) )
 
-# + [markdown]
+# %% [markdown]
 # ## 1.2 Discriminator = 2D-CNN
 #
 # For the discriminator we will use a two-dimensional convolutional neural
@@ -304,16 +304,16 @@ summary(G, (1, 64, 64) )
 # image since we are using a conditional GAN. Therefore, the number of input
 # channels for the first layer will be two (one for each image).
 
-# + [markdown]
+# %% [markdown]
 # <a href="https://ibb.co/9b2jF0V"><img src="https://i.ibb.co/hBHvPNZ/Capture-d-cran-2020-03-02-16-04-14.png" width="800" alt="Capture-d-cran-2020-03-02-16-04-14" border="0"></a>
 
-# + [markdown]
+# %% [markdown]
 # <div class="alert alert-block alert-info">
 #  <b>Exercise</b>: Create a <code>Discriminator</code> class to define the
 #  discriminator with the architecture given above.
 # </div>
 
-# + [code]
+# %%
 # Define the blocks used for the discriminator
 
 def discriminator_block(in_filters, out_filters):
@@ -345,12 +345,12 @@ class Discriminator(nn.Module):
         return self.model(img_input)
 
 
-# + [code]
+# %%
 # Summary of the discriminator
 D = Discriminator().cuda()
 summary(D, [(1, 64, 64), (1, 64, 64)])
 
-# + [markdown]
+# %% [markdown]
 # # 2. Training our conditional GAN
 #
 # Now that we have created our generator and our discriminator, we have to
@@ -409,13 +409,13 @@ summary(D, [(1, 64, 64), (1, 64, 64)])
 #         # Compute the loss for the discriminator and perform one optimization step
 # ```
 
-# + [markdown]
+# %% [markdown]
 # <div class="alert alert-block alert-info">
 #  <b>Exercise</b>: We provide below a template to train our conditional GAN
 #  on the dataset. Fill in the missing parts and look at the generated images.
 # </div>
 
-# + [code]
+# %%
 def train(train_loader, test_loader, num_epoch=500,
           lr=0.0001, beta1=0.9, beta2=0.999):
     """
@@ -568,7 +568,7 @@ def train(train_loader, test_loader, num_epoch=500,
 
     return generator
 
-# + [code]
+# %%
 # Parameters for Adam optimizer
 lr = 0.0002
 beta1 = 0.5
@@ -589,7 +589,7 @@ num_epoch = 20
 generator = train(train_loader, test_loader, num_epoch=num_epoch,
                   lr=lr, beta1=beta1, beta2=beta2)
 
-# + [code]
+# %%
 import matplotlib.image as img
 
 
@@ -601,7 +601,7 @@ plt.imshow(np.swapaxes(im, 0, 1))
 plt.gca().invert_yaxis()
 plt.show()
 
-# + [markdown]
+# %% [markdown]
 # # 3. Evaluating the quality of the generated images
 #
 # After doing visual quality control, it is a good idea to quantify the quality
@@ -622,7 +622,7 @@ plt.show()
 # To better understand the differences between these metrics:
 # https://www.pyimagesearch.com/2014/09/15/python-compare-two-images/
 
-# + [markdown]
+# %% [markdown]
 # <div class="alert alert-block alert-info">
 #  <b>Exercise</b>: Define a function for each metric mentioned above and
 #  evaluate the quality of the generated images on the training and test
@@ -630,7 +630,7 @@ plt.show()
 #  and worst generated images according to these metrics.
 # </div>
 
-# + [code]
+# %%
 def MSE(image_true, image_generated):
     """Compute mean squared error.
 
@@ -680,7 +680,7 @@ def SSIM(image_true, image_generated, C1=0.01, C2=0.03):
                    (std_true ** 2 + std_generated ** 2 + C2))
     return numerator / denominator
 
-# + [code]
+# %%
 import pandas as pd
 
 
@@ -707,7 +707,7 @@ def compute_metrics(dataloader):
     df = pd.DataFrame(res, columns=['MSE', 'PSNR', 'SSIM'])
     return df
 
-# + [code]
+# %%
 train_loader = DataLoader(
     MvaDataset(root=root, mode="train"),
     batch_size=1,
@@ -723,8 +723,8 @@ test_dataloader = DataLoader(
 df_train = compute_metrics(train_loader)
 df_test = compute_metrics(test_loader)
 
-# + [code]
+# %%
 df_train
 
-# + [code]
+# %%
 df_test
