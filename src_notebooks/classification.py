@@ -21,6 +21,7 @@
 # T1 weighted MRI. In this project we use the [pytorch
 # library](https://pytorch.org/).
 
+# %%
 import torch
 import numpy as np
 import pandas as pd
@@ -42,7 +43,8 @@ from copy import deepcopy
 #
 # All the preprocessed images we use were put on github, run the following
 # command to download them.
-#
+
+# %%
 ! git clone https://github.com/14thibea/OASIS-1_dataset.git
 
 # %% [markdown]
@@ -59,7 +61,7 @@ from copy import deepcopy
 # non-demented and of 0.5, 1, 2 and 3 for very mild, mild, moderate and severe
 # dementia, respectively.
 
-# + id="Moe2GRGkPyJJ" colab={"base_uri": "https://localhost:8080/", "height": 69} outputId="925a346b-36ff-41c9-8dd2-7e0a2b659595"
+# %%
 # Load the complete dataset
 OASIS_df = pd.read_csv('OASIS-1_dataset/tsv_files/lab_1/OASIS_BIDS.tsv', sep='\t')
 
@@ -115,6 +117,7 @@ print(population_df)
 # The preprocessed images all have the same size (121x145x121). You will find
 # below a Dataset that allow to browse easily the database.
 
+# %%
 from torch.utils.data import Dataset, DataLoader, sampler
 from os import path
 
@@ -171,6 +174,7 @@ class MRIDataset(Dataset):
 # hippocampus may be shifted by a limited amount of voxels in each of the three
 # directions.
 
+# %%
 class CropLeftHC(object):
     """Crops the left hippocampus of a MRI non-linearly registered to MNI"""
     def __init__(self, random_shift=0):
@@ -221,7 +225,7 @@ class CropRightHC(object):
 #
 # Here we visualize the raw, preprocessed and cropped data.
 
-# + id="eFpB23ybfOWg" colab={"base_uri": "https://localhost:8080/", "height": 832} outputId="e25fce32-1179-45ae-86a2-d79fe6a37beb"
+# %%
 import matplotlib.pyplot as plt
 import nibabel as nib
 from scipy.ndimage import rotate
@@ -270,7 +274,7 @@ plt.show()
 # the subjects of the training set and the subjects of the validation set.
 # Moreover the MMS distribution of each class is preserved.
 
-# + id="2v9DDGoQcFy0" colab={"base_uri": "https://localhost:8080/", "height": 173} outputId="b5b69fac-fb03-45dc-8ce3-2434b03b91ba"
+# %%
 train_df = pd.read_csv('OASIS-1_dataset/tsv_files/lab_1/train.tsv', sep='\t')
 valid_df = pd.read_csv('OASIS-1_dataset/tsv_files/lab_1/validation.tsv', sep='\t')
 
@@ -290,7 +294,7 @@ print(valid_population_df)
 # hyperparameters.
 #
 
-# + [markdown] id="484-30ZSd8CT"
+# %% [markdown]
 # ## Reminder on CNN layers
 #
 # In a CNN everything is called a layer though the operations layers perform
@@ -310,7 +314,7 @@ print(valid_population_df)
 # dimension is the batch size. This dimension is added by the `DataLoader` of
 # pytorch which stacks the 4D tensors computed by a `Dataset`.
 
-# + id="x1VVZU27iXCR" colab={"base_uri": "https://localhost:8080/", "height": 104} outputId="42b88c8e-a286-4501-c1ed-bb71788ab862"
+# %% 
 img_dir = path.join('OASIS-1_dataset', 'preprocessed')
 batch_size=4
 
@@ -324,7 +328,6 @@ print()
 print("Shape of DataLoader output\n", data['image'].shape)
 
 # %% [markdown]
-#
 # ### Convolutions (`nn.Conv3d`)
 #
 # The main arguments of this layer are the input channels, the output channels
@@ -358,7 +361,7 @@ print("Shape of DataLoader output\n", data['image'].shape)
 # all the feature maps it produces. Then the bias is a 1D vector of size
 # `output_channels`.
 
-# + id="ETjl7kp17-IM" colab={"base_uri": "https://localhost:8080/", "height": 104} outputId="6b2987dd-850c-4598-fe3d-b8cb20a81e4b"
+# %%
 from torch import nn
 
 conv_layer = nn.Conv3d(8, 16, 3)
@@ -383,7 +386,7 @@ print('Bias shape\n', conv_layer.bias.shape)
 # this is why it is needed to put the model in evaluation mode in the test
 # function with the command `.eval()`
 
-# + id="8QPASZehDHjc" colab={"base_uri": "https://localhost:8080/", "height": 104} outputId="6b9218de-4d3f-48fc-fb3f-63343f47f843"
+# %%
 batch_layer = nn.BatchNorm3d(16)
 print('Gamma value\n', batch_layer.state_dict()['weight'].shape)
 print()
@@ -419,7 +422,8 @@ print('Beta value\n', batch_layer.state_dict()['bias'].shape)
 #
 # This is why the custom module `PadMaxPool` was defined to pad the input in
 # order to exploit information from the whole feature map.
-#
+
+# %%
 class PadMaxPool3d(nn.Module):
     """A MaxPooling module which deals with odd sizes with padding"""
     def __init__(self, kernel_size, stride, return_indices=False, return_pad=False):
@@ -440,10 +444,7 @@ class PadMaxPool3d(nn.Module):
         coords = [self.stride - f_maps.size(i + 2) % self.stride for i in range(3)]
         for i, coord in enumerate(coords):
             if coord == self.stride:
-                coords[i] = 0
-
-        self.pad.padding = (coords[2], 0, coords[1], 0, coords[0], 0)
-
+                coords[i] = 0 self.pad.padding = (coords[2], 0, coords[1], 0, coords[0], 0)
         if self.return_indices:
             output, indices = self.pool(self.pad(f_maps))
 
@@ -471,9 +472,9 @@ class PadMaxPool3d(nn.Module):
 #
 # > $O_i = ceil(\frac{I_i-k+2P}{S}) + 1$
 
-# + [markdown]
-# ### Dropout (`nn.Dropout`)
-#
+
+# %% [markdown] 
+# ### Dropout (`nn.Dropout`) 
 # The aim of a dropout layer is to replace a fixed proportion of the input
 # values by 0 during training only.
 #
@@ -481,7 +482,7 @@ class PadMaxPool3d(nn.Module):
 # this is why it is needed to put the model in evaluation mode in the test
 # function with the command `.eval()`
 
-# + id="-0O3cCR7HGge" colab={"base_uri": "https://localhost:8080/", "height": 139} outputId="5e09b0ea-b9ae-42c5-f390-b51f4a8b07e5"
+# %%
 dropout = nn.Dropout(0.5)
 input_tensor = torch.rand(10)
 output_tensor = dropout(input_tensor)
@@ -499,7 +500,7 @@ print("Output \n", output_tensor)
 # Each output neuron in a FC layer is a linear combination of the inputs + a
 # bias.
 
-# + id="um2OupjmGy94" colab={"base_uri": "https://localhost:8080/", "height": 104} outputId="42ef6dec-e7d5-40a5-8547-5d682afa539e"
+# %%
 fc = nn.Linear(16, 2)
 print("Weights shape \n", fc.weight.shape)
 print()
@@ -512,6 +513,7 @@ print("Bias shape \n", fc.bias.shape)
 # To avoid this we use a custom module `PadMaxPool3d` instead of the standard
 # module `nn.MaxPooling3d`.
 
+# %%
 class PadMaxPool3d(nn.Module):
     """A MaxPooling module which deals with odd sizes with padding"""
     def __init__(self, kernel_size, stride, return_indices=False, return_pad=False):
@@ -569,6 +571,7 @@ class PadMaxPool3d(nn.Module):
 # fully-connected layer. Between the convolutional and the fully-connected
 # layers, a dropout layer with a dropout rate of 0.5 is inserted. 
 
+# %%
 class CustomNetwork(nn.Module):
     
     def __init__(self):
@@ -602,7 +605,7 @@ class CustomNetwork(nn.Module):
 # remember that even if your results on the validation set are better, that
 # doesn't mean that this would be the case on an independent test set.
 
-# + id="1yVfkO-QvzfM" colab={"base_uri": "https://localhost:8080/", "height": 130} outputId="ff6c9524-cdba-4894-938e-0a2d94609f12"
+# %%
 def train(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train a CNN
@@ -727,6 +730,7 @@ def compute_metrics(ground_truth, prediction):
 #
 # Construction of dataset objects
 
+# %%
 img_dir = path.join('OASIS-1_dataset', 'preprocessed')
 transform = CropLeftHC(2)
 
@@ -766,6 +770,8 @@ print(train_metricsLeftHC)
 
 # Check accuracy of old participants (age > 62 to match the minimum of AD age
 # distribution)
+
+# %%
 valid_resultsLeftHC_df = valid_resultsLeftHC_df.merge(OASIS_df, how='left', on='participant_id', sort=False)
 valid_resultsLeftHC_old_df = valid_resultsLeftHC_df[(valid_resultsLeftHC_df.age_bl_x >= 62)]
 compute_metrics(valid_resultsLeftHC_old_df.true_label, valid_resultsLeftHC_old_df.predicted_label)
@@ -782,6 +788,7 @@ compute_metrics(valid_resultsLeftHC_old_df.true_label, valid_resultsLeftHC_old_d
 #
 # Construction of dataset objects
 
+# %%
 transform = CropRightHC(2)
 
 train_datasetRightHC = MRIDataset(img_dir, train_df, transform=transform)
@@ -806,11 +813,12 @@ print(valid_metricsRightHC)
 print(train_metricsRightHC)
 
 
-# + [markdown] id="4DrQZBkufKM-"
+# %% [markdown]
 # ## Soft voting
 # To increase the accuracy of our system the results of the two networks can be
 # combined. Here we can give both hippocampi the same weight.
 
+# %%
 def softvoting(df1, df2):
     df1 = df1.set_index('participant_id', drop=True)
     df2 = df2.set_index('participant_id', drop=True)
@@ -864,6 +872,7 @@ print(valid_metrics)
 # You will find below `CropMaxUnpool3d` the transposed version of
 # `PadMaxPool3d`.
 
+# %%
 class CropMaxUnpool3d(nn.Module):
     def __init__(self, kernel_size, stride):
         super(CropMaxUnpool3d, self).__init__()
@@ -888,6 +897,7 @@ class CropMaxUnpool3d(nn.Module):
 # the feature map so that the unpooling layer can correctly crop their output
 # feature map.  
 
+# %%
 class AutoEncoder(nn.Module):
     
     def __init__(self):
@@ -971,6 +981,7 @@ class AutoEncoder(nn.Module):
 # but with the original image using for example the Mean Squared Error (MSE)
 # loss.
 
+# %%
 def trainAE(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train an AutoEncoder
@@ -1052,6 +1063,7 @@ best_AELeftHC = trainAE(AELeftHC, train_loaderLeftHC, criterion, optimizer, n_ep
 # The simplest way to check if the AE training went well is to visualize the
 # output and compare it to the original image seen by the autoencoder.
 
+# %%
 import matplotlib.pyplot as plt
 import nibabel as nib
 from scipy.ndimage import rotate
@@ -1090,6 +1102,7 @@ plt.show()
 # of all the subjects in two matrices *X* and *Y*. This is what is done in
 # `compute_dataset_features` method.
 
+# %%
 def compute_dataset_features(data_loader, model):
 
     concat_codes = torch.Tensor().cuda()
@@ -1119,6 +1132,7 @@ train_codes, train_labels, names = compute_dataset_features(train_loaderBothHC, 
 # Then the model will fit the training codes and build two clusters. The labels
 # found in this unsupervised way can be compared to the true labels.
 
+# %%
 from sklearn import mixture
 
 components = 2
@@ -1137,6 +1151,7 @@ print(metrics)
 # the level of atrophy, which is mostly correlated to the age but also to the
 # disease stage (we can model it with the MMS score).
 
+# %%
 data_np = np.concatenate([names, train_codes,
                           train_labels[:, np.newaxis],
                           train_predict[:, np.newaxis]], axis=1)
@@ -1155,7 +1170,7 @@ plt.xlabel('age')
 plt.ylabel('MMS')
 plt.show()
 
-# %% [markdown] id="u6zujwJw1cyd"
+# %% [markdown]
 # You can try to improve this clustering by adding the codes obtained on the
 # right hippocampus, perform further dimension reduction or remove age effect
 # like in [(Moradi et al,
