@@ -350,7 +350,7 @@ print("Shape of DataLoader output\n", data['image'].shape)
 #
 # In the following example $\frac{5-3+2*0}{1}+1 = 3$
 #
-# ![2D convolutional layer gif](https://drive.google.com/uc?id=166EuqiwIZkKPMOlVzA-v5WemJE2tDCES) 
+# <img src="https://drive.google.com/uc?id=166EuqiwIZkKPMOlVzA-v5WemJE2tDCES" style="height: 200px;">
 #
 # To be able to parse all the feature maps of the input, one filter is actually
 # a 4D tensor of size `(input_channels, k, k, k)`. The ensemble of all the
@@ -416,6 +416,7 @@ print('Beta value\n', batch_layer.state_dict()['bias'].shape)
 # Here is an example in 2D of the standard layer of pytorch `nn.MaxPool2d`:
 #
 # ![nn.MaxPool2d behaviour](https://drive.google.com/uc?id=1qh9M9r9mfpZeSD1VjOGQAl8zWqBLmcKz)
+# <a href="nn.MaxPool2d behaviour"><img src="(https://drive.google.com/uc?id=1qh9M9r9mfpZeSD1VjOGQAl8zWqBLmcKz" style="height: 200px;"></a>
 #
 # We can observe that the last column may not be used depending on the size of
 # the kernel/input and stride value.
