@@ -415,7 +415,6 @@ print('Beta value\n', batch_layer.state_dict()['bias'].shape)
 #
 # Here is an example in 2D of the standard layer of pytorch `nn.MaxPool2d`:
 #
-# ![nn.MaxPool2d behaviour](https://drive.google.com/uc?id=1qh9M9r9mfpZeSD1VjOGQAl8zWqBLmcKz)
 # <a href="nn.MaxPool2d behaviour"><img src="(https://drive.google.com/uc?id=1qh9M9r9mfpZeSD1VjOGQAl8zWqBLmcKz" style="height: 200px;"></a>
 #
 # We can observe that the last column may not be used depending on the size of
@@ -467,7 +466,7 @@ class PadMaxPool3d(nn.Module):
 # Here is an illustration of `PadMaxPool` behaviour, a column is added to avoid
 # losing data:
 #
-# ![PadMaxPool behaviour](https://drive.google.com/uc?id=14R_LCTiV0N6ZXm-3wQCj_Gtc1LsXdQq_)
+# <a href="PadMaxPool behaviour"><img src="https://drive.google.com/uc?id=14R_LCTiV0N6ZXm-3wQCj_Gtc1LsXdQq_" style="height: 200px;"></a>
 #
 # Similarly, the formula to find the size of the output feature map is:
 #
