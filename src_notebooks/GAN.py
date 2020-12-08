@@ -96,7 +96,7 @@ import sys
 from torchvision.utils import save_image
 
 # %% [markdown]
-# Let's create a custom `MvaDataset` class to easily have access to the data.
+# Let's create a custom `IXIDataset` class to easily have access to the data.
 # Here we don't use tsv files to split subjects between the training and the
 # test set. We only set the dataset to the `train` or `test` mode to access
 # training or test data.
@@ -105,7 +105,7 @@ from torchvision.utils import save_image
 import os
 
 
-class MvaDataset(torch.utils.data.Dataset):
+class IXIDataset(torch.utils.data.Dataset):
     """Dataset utility class.
 
     Args:
@@ -164,7 +164,7 @@ class MvaDataset(torch.utils.data.Dataset):
 # # Create a DataLoader instance for the training set
 # # You will get a batch of samples from the training set
 # dataloader = DataLoader(
-#     MvaDataset(root, mode="train"),
+#     IXIDataset(root, mode="train"),
 #     batch_size=1,
 #     shuffle=False,
 # )
@@ -576,11 +576,11 @@ beta2 = 0.999
 
 # Create dataloaders
 batch_size = 40
-train_loader = DataLoader(MvaDataset(root, mode="train"),
+train_loader = DataLoader(IXIDataset(root, mode="train"),
                           batch_size=batch_size,
                           shuffle=True)
 
-test_loader = DataLoader(MvaDataset(root, mode="test"),
+test_loader = DataLoader(IXIDataset(root, mode="test"),
                          batch_size=5,
                          shuffle=False)
 
@@ -709,13 +709,13 @@ def compute_metrics(dataloader):
 
 # %%
 train_loader = DataLoader(
-    MvaDataset(root=root, mode="train"),
+    IXIDataset(root=root, mode="train"),
     batch_size=1,
     shuffle=False,
 )
 
 test_dataloader = DataLoader(
-    MvaDataset(root=root, mode="test"),
+    IXIDataset(root=root, mode="test"),
     batch_size=1,
     shuffle=False,
 )
