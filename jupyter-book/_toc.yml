@@ -3,8 +3,8 @@
 
 - part: Part 1 - Classification in the context of computer-aided diagnosis 
   chapters:
-    - file: src_notebooks/classification
+    - file: notebooks/classification
 
 - part: Part 2 - Image synthesis
   chapters:
-    - file: src_notebooks/GAN
+    - file: notebooks/GAN
