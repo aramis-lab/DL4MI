@@ -43,7 +43,7 @@ pipeline {
              conda activate jb_env
              cd jupyter-book
              make
-             sed -i 's+github.com/aramis-lab/DL4MI/edit/main/jupyter-book/notebooks+github.com/aramis-lab/DL4MI/edit/main/notebooks+g' _build/html/notebooks/*.html
+             sed -i 's+github/aramis-lab/DL4MI/blob/main/jupyter-book/notebooks+github/aramis-lab/DL4MI/blob/main/notebooks+g' _build/html/notebooks/*.html
              conda deactivate
              '''
           stash(name: 'doc_html', includes: 'jupyter-book/_build/html/**')
