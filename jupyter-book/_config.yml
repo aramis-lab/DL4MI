@@ -21,7 +21,7 @@ repository:
 launch_buttons:
   notebook_interface: classic
   colab_url: https://colab.research.google.com
-  jupyterhub_url: "localhost:8080"  # The URL for your JupyterHub. (e.g., https://datahub.berkeley.edu)
+  #jupyterhub_url: "localhost:8080"  # The URL for your JupyterHub. (e.g., https://datahub.berkeley.edu)
 
 ######################################################################################
 # Execution settings
