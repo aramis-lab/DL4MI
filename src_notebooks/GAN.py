@@ -494,9 +494,9 @@ plt.show()
 # of the generated images using specific metrics. The most popular metrics are
 # Mean Absolute Error (MAE), Peak Signal-to-Noise Ratio (PSNR) and Structural
 # Similarity index (SSIM):
-# * MAE = $\displaystyle \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m (T_{ij} - G_{ij}) $
+# * MAE = $\displaystyle \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m \vert T_{ij} - G_{ij} \vert $
 #
-# * PSNR = $\displaystyle -10 \log_{10} \left( \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m (T_{ij} - G_{ij}) \right) $
+# * PSNR = $\displaystyle -10 \log_{10} \left( \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m (T_{ij} - G_{ij})^2 \right) $
 #
 # * SSIM = $\displaystyle  \frac{(2 \mu_T \mu_G + C_1)(2 \sigma_{TG} + C_2)}{(\mu_T^2 +
 # \mu_G^2 + C_1)(\sigma_T^2 + \sigma_G^2 + C2)} $ where:
@@ -1002,10 +1002,13 @@ evaluate_generator(generator_cgan)
 # </a>
 
 # %% [markdown]
-# ## 3.1 Discriminator of the CycleGAN
+# ## 3.1 Architecture of the CycleGAN
 #
 # The discriminators of the CycleGAN do not have the true sample as input.
 # Thus, we have to remove the true sample in the `forward` method.
+#
+# Otherwise, we will use the same architectures for the generators and for
+# the discriminators as the ones from the conditional GAN.
 
 # %%
 class DiscriminatorCycle(nn.Module):
