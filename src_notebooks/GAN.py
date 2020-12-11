@@ -1275,7 +1275,7 @@ generator_cyclegan = train_cyclegan(
 )
 
 # %% [markdown]
-## 3.3 Evaluating the generator of our CycleGAN
+# ## 3.3 Evaluating the generator of our CycleGAN
 #
 # Let's visualize a few generated T2-weighted images:
 
