@@ -320,7 +320,7 @@ class GeneratorUNet(nn.Module):
 summary(GeneratorUNet().cuda(), (1, 64, 64) )
 
 # %% [markdown]
-## 1.2 Train the generator
+# ## 1.2 Train the generator
 #
 # In order to train the generator, we will repeat the following process:
 #
