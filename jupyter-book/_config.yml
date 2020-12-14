@@ -57,7 +57,7 @@ sphinx:
     - sphinx_tabs.tabs
 
 
-latex:
-  latex_engine                : "xelatex"
-  latex_documents:
-    targetname: book.tex     
+#latex:
+#  latex_engine                : "xelatex"
+#  latex_documents:
+#    targetname: book.tex     
