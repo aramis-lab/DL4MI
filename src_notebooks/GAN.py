@@ -499,7 +499,7 @@ plt.show()
 # * PSNR = $\displaystyle -10 \log_{10} \left( \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m (T_{ij} - G_{ij})^2 \right) $
 #
 # * SSIM = $\displaystyle  \frac{(2 \mu_T \mu_G + C_1)(2 \sigma_{TG} + C_2)}{(\mu_T^2 +
-# \mu_G^2 + C_1)(\sigma_T^2 + \sigma_G^2 + C2)} $ where:
+# \mu_G^2 + C_1)(\sigma_T^2 + \sigma_G^2 + C_2)} $ where:
 #
 #     * $\mu$ and $\sigma$ are the mean value and standard deviation of an image respectively, and
 #     * $C_1$ and $C_2$ are two positive constants (one can take $C_1=0.01$ and $C_2=0.03$).
@@ -748,9 +748,9 @@ summary(Discriminator().cuda(), [(1, 64, 64), (1, 64, 64)])
 # image.
 #
 # For one sample, it is then:
-# $$
+# $
 # \ell_G = - \log(\hat{y}_{\tilde{X}}) + \lambda * \text{MAE}(X_{T2}, \tilde{X}_{T2})
-# $$
+# $
 #
 # **Training the discriminator**
 #
@@ -762,9 +762,9 @@ summary(Discriminator().cuda(), [(1, 64, 64), (1, 64, 64)])
 # of the true images and positive labels.
 #
 # For one sample, it is then:
-# $$
+# $
 # \ell_D = - 0.5 * \log(\hat{y}_{X}) - 0.5 * \log(1 - \hat{y}_{\tilde{X}})
-# $$
+# $
 #
 # **Training phase**
 #
