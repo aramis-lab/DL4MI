@@ -366,7 +366,7 @@ def train_generator(train_loader, test_loader, num_epoch=500,
     """
 
     cuda = True if torch.cuda.is_available() else False
-    print("cuda %s" % cuda)  # check if GPU is used
+    print(f"Using cuda device: {cuda}")  # check if GPU is used
 
     # Tensor type (put everything on GPU if possible)
     Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
@@ -396,7 +396,7 @@ def train_generator(train_loader, test_loader, num_epoch=500,
         real_B = Variable(imgs["T2"].type(Tensor))
         fake_B = generator(real_A)
         img_sample = torch.cat((real_A.data, fake_B.data, real_B.data), -2)
-        save_image(img_sample, "./images/generator/epoch-%s.png" % epoch,
+        save_image(img_sample, f"./images/generator/epoch-{epoch}.png",
                    nrow=5, normalize=True)
 
     # ----------
@@ -483,7 +483,7 @@ generator = train_generator(train_loader, test_loader, num_epoch=num_epoch,
 # Let's visualize a few generated T2-weighted images:
 
 # %%
-im = img.imread('./images/generator/epoch-%s.png' % (num_epoch - 1))
+im = img.imread(f'./images/generator/epoch-{num_epoch - 1}.png')
 plt.figure(figsize=(20, 20))
 plt.imshow(np.swapaxes(im, 0, 1))
 plt.gca().invert_yaxis()
@@ -650,7 +650,7 @@ evaluate_generator(generator)
 # The discriminator aims at improving the generator by having an opposition.
 # The discriminator must not be too good, otherwise the generator won't improve.
 # The generator and the discriminator are trained simultaneously and help
-# eachothers improve.
+# each other improve.
 #
 # A conditional generative adversarial network (cGAN) is a particular case
 # of a GAN that is conditioned by the true sample.
@@ -796,7 +796,7 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
 
     Args:
         train_loader: (DataLoader) a DataLoader wrapping a the training dataset
-        test_loader: (DataLoader) a DataLoader wrapping a the training dataset
+        test_loader: (DataLoader) a DataLoader wrapping a the test dataset
         num_epoch: (int) number of epochs performed during training
         lr: (float) learning rate of the discriminator and generator Adam optimizers
         beta1: (float) beta1 coefficient of the discriminator and generator Adam optimizers
@@ -807,7 +807,7 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
     """
 
     cuda = True if torch.cuda.is_available() else False
-    print("cuda %s" % cuda)  # check if GPU is used
+    print(f"Using cuda device: {cuda}")  # check if GPU is used
 
     # Tensor type (put everything on GPU if possible)
     Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
@@ -846,7 +846,7 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
         real_t2 = Variable(imgs["T2"].type(Tensor))
         fake_t2 = generator(real_t1)
         img_sample = torch.cat((real_t1.data, fake_t2.data, real_t2.data), -2)
-        save_image(img_sample, "./images/cgan/epoch-%s.png" % epoch,
+        save_image(img_sample, f"./images/cgan/epoch-{epoch}.png",
                    nrow=5, normalize=True)
 
     # ----------
@@ -953,7 +953,7 @@ generator_cgan = train_cgan(train_loader, test_loader, num_epoch=num_epoch,
 
 # %%
 plt.figure(figsize=(20, 20))
-im = img.imread('./images/cgan/epoch-%s.png' % (num_epoch - 1))
+im = img.imread(f'./images/cgan/epoch-{num_epoch - 1}.png')
 plt.imshow(np.swapaxes(im, 0, 1))
 plt.gca().invert_yaxis()
 plt.show()
@@ -1078,7 +1078,7 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
 
     Args:
         train_loader: (DataLoader) a DataLoader wrapping a the training dataset
-        test_loader: (DataLoader) a DataLoader wrapping a the training dataset
+        test_loader: (DataLoader) a DataLoader wrapping a the test dataset
         num_epoch: (int) number of epochs performed during training
         lr: (float) learning rate of the discriminator and generator Adam optimizers
         beta1: (float) beta1 coefficient of the discriminator and generator Adam optimizers
@@ -1089,7 +1089,7 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
     """
 
     cuda = True if torch.cuda.is_available() else False
-    print("cuda %s" % cuda)  # check if GPU is used
+    print(f"Using cuda device: {cuda}")  # check if GPU is used
 
     # Tensor type (put everything on GPU if possible)
     Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
@@ -1144,7 +1144,7 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
         real_t2 = Variable(imgs["T2"].type(Tensor))
         fake_t2 = generator_from_t1_to_t2(real_t1)
         img_sample = torch.cat((real_t1.data, fake_t2.data, real_t2.data), -2)
-        save_image(img_sample, "./images/cyclegan/epoch-%s.png" % epoch,
+        save_image(img_sample, f"./images/cyclegan/epoch-{epoch}.png",
                    nrow=5, normalize=True)
 
     # ----------
@@ -1284,7 +1284,7 @@ generator_cyclegan = train_cyclegan(
 
 # %%
 plt.figure(figsize=(20, 20))
-im = img.imread('./images/cyclegan/epoch-%s.png' % (num_epoch - 1))
+im = img.imread(f'./images/cyclegan/epoch-{num_epoch - 1}.png')
 plt.imshow(np.swapaxes(im, 0, 1))
 plt.gca().invert_yaxis()
 plt.show()
@@ -1312,3 +1312,5 @@ evaluate_generator(generator_cyclegan)
 # <a href="https://ibb.co/Q8FrRrd">
 #   <img src="https://i.ibb.co/6vRgxgB/style-transfer.png" width="800" border="0">
 #</a>
+
+# %%
