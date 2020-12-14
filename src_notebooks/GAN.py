@@ -748,9 +748,9 @@ summary(Discriminator().cuda(), [(1, 64, 64), (1, 64, 64)])
 # image.
 #
 # For one sample, it is then:
-# $
+# ```{math}
 # \ell_G = - \log(\hat{y}_{\tilde{X}}) + \lambda * \text{MAE}(X_{T2}, \tilde{X}_{T2})
-# $
+# ```
 #
 # **Training the discriminator**
 #
@@ -762,9 +762,9 @@ summary(Discriminator().cuda(), [(1, 64, 64), (1, 64, 64)])
 # of the true images and positive labels.
 #
 # For one sample, it is then:
-# $
+# ```{math}
 # \ell_D = - 0.5 * \log(\hat{y}_{X}) - 0.5 * \log(1 - \hat{y}_{\tilde{X}})
-# $
+# ```
 #
 # **Training phase**
 #
