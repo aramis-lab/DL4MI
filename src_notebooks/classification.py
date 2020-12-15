@@ -231,10 +231,10 @@ import nibabel as nib
 from scipy.ndimage import rotate
 
 subject = 'sub-OASIS10003'
-preprocessed_pt = torch.load('OASIS-1_dataset/preprocessed/%s_ses-M00_' % subject +
+preprocessed_pt = torch.load(f'OASIS-1_dataset/preprocessed/{subject}_ses-M00_' +
                     'T1w_segm-graymatter_space-Ixi549Space_modulated-off_' +
                     'probability.pt')
-raw_nii = nib.load('OASIS-1_dataset/raw/%s_ses-M00_T1w.nii.gz' % subject)
+raw_nii = nib.load(f'OASIS-1_dataset/raw/{subject}_ses-M00_T1w.nii.gz')
 raw_np = raw_nii.get_data()
 
 def show_slices(slices):
@@ -247,14 +247,14 @@ slice_0 = raw_np[80, :, :]
 slice_1 = raw_np[:, 130, :]
 slice_2 = raw_np[:, :, 60]
 show_slices([rotate(slice_0, 90), rotate(slice_1, 90), slice_2])
-plt.suptitle('Slice of raw image of subject %s' % subject)
+plt.suptitle(f'Slice of raw image of subject {subject}')
 plt.show()
 
 slice_0 = preprocessed_pt[0, 60, :, :]
 slice_1 = preprocessed_pt[0, :, 72, :]
 slice_2 = preprocessed_pt[0, :, :, 60]
 show_slices([slice_0, slice_1, slice_2])
-plt.suptitle('Center slices of preprocessed image of subject %s' % subject)
+plt.suptitle(f'Center slices of preprocessed image of subject {subject}')
 plt.show()
 
 leftHC_pt = CropLeftHC()(preprocessed_pt)
@@ -262,7 +262,7 @@ slice_0 = leftHC_pt[0, 15, :, :]
 slice_1 = leftHC_pt[0, :, 20, :]
 slice_2 = leftHC_pt[0, :, :, 15]
 show_slices([slice_0, slice_1, slice_2])
-plt.suptitle('Center slices of left HC of subject %s' % subject)
+plt.suptitle(f'Center slices of left HC of subject {subject}')
 plt.show()
 
 # %% [markdown]
@@ -444,7 +444,10 @@ class PadMaxPool3d(nn.Module):
         coords = [self.stride - f_maps.size(i + 2) % self.stride for i in range(3)]
         for i, coord in enumerate(coords):
             if coord == self.stride:
-                coords[i] = 0 self.pad.padding = (coords[2], 0, coords[1], 0, coords[0], 0)
+                coords[i] = 0 
+                
+        self.pad.padding = (coords[2], 0, coords[1], 0, coords[0], 0)
+        
         if self.return_indices:
             output, indices = self.pool(self.pad(f_maps))
 
