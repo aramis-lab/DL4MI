@@ -339,7 +339,7 @@ print(f"Validation dataset:\n {valid_population_df}")
 #
 # For a 3D CNN the dimension of the feature maps is actually 5D as the first
 # dimension is the batch size. This dimension is added by the `DataLoader` of
-# pytorch which stacks the 4D tensors computed by a `Dataset`.
+# Pytorch which stacks the 4D tensors computed by a `Dataset`.
 
 # %% 
 img_dir = path.join('OASIS-1_dataset', 'preprocessed')
@@ -350,9 +350,9 @@ example_dataloader = DataLoader(example_dataset, batch_size=batch_size, drop_las
 for data in example_dataloader:
     pass
 
-print("Shape of Dataset output\n", example_dataset[0]['image'].shape)
-print()
-print("Shape of DataLoader output\n", data['image'].shape)
+print(f"Shape of Dataset output:\n {example_dataset[0]['image'].shape}\n")
+
+print(f"Shape of DataLoader output:\n {data['image'].shape}")
 
 # %% [markdown]
 # ### Convolutions (`nn.Conv3d`)
