@@ -287,6 +287,30 @@ print("Validation")
 print(valid_population_df)
 
 # %% [markdown]
+# We can observe that our dataset is biased: the AD and CN populations do 
+# not have the same age distributions at all! It becomes then very easy 
+# to differentiate them as the age regression between 20 and 95 years old is
+#  an easier task than AD vs CN classification.
+
+# To avoid this bias, the youngest participants of OASIS are removed from 
+# the training and validation DataFrames. More precisely, to match the AD
+# population in which the youngest participant is 62, all participants 
+# younger than 62 are removed.
+
+# %%
+train_df = train_df[['participant_id']].merge(OASIS_df, how='left', on='participant_id', sort=False)
+train_df = train_df[train_df.age_bl >= 62]
+valid_df = valid_df[['participant_id']].merge(OASIS_df, how='left', on='participant_id', sort=False)
+valid_df = valid_df[valid_df.age_bl >= 62]
+
+train_population_df = characteristics_table(train_df, OASIS_df)
+valid_population_df = characteristics_table(valid_df, OASIS_df)
+print("Train")
+print(train_population_df)
+print()
+print("Validation")
+print(valid_population_df)
+# %% [markdown]
 # # Model
 # We propose here to design a convolutional neural network that takes for input
 # a patch centered on the left hippocampus of size 30x40x30. The architecture
@@ -415,7 +439,7 @@ print('Beta value\n', batch_layer.state_dict()['bias'].shape)
 #
 # Here is an example in 2D of the standard layer of pytorch `nn.MaxPool2d`:
 #
-# <a href="nn.MaxPool2d behaviour"><img src="(https://drive.google.com/uc?id=1qh9M9r9mfpZeSD1VjOGQAl8zWqBLmcKz" style="height: 200px;"></a>
+# ![nn.MaxPool2d behaviour](https://drive.google.com/uc?id=1qh9M9r9mfpZeSD1VjOGQAl8zWqBLmcKz)
 #
 # We can observe that the last column may not be used depending on the size of
 # the kernel/input and stride value.
@@ -575,6 +599,7 @@ class PadMaxPool3d(nn.Module):
 # layers, a dropout layer with a dropout rate of 0.5 is inserted. 
 
 # %%
+# ToDo
 class CustomNetwork(nn.Module):
     
     def __init__(self):
@@ -585,7 +610,46 @@ class CustomNetwork(nn.Module):
     def forward(self, x):
         # Compose the forward operation using the layers defined in __init__
         pass
-
+# %%
+class CustomNetwork(nn.Module):
+    
+    def __init__(self):
+        super(CustomNetwork, self).__init__()
+        self.convolutions = nn.Sequential(
+            nn.Conv3d(1, 8, 3, padding=1),
+            # Size 8@30x40x30
+            nn.BatchNorm3d(8),
+            nn.LeakyReLU(),
+            PadMaxPool3d(2, 2),
+            # Size 8@15x20x15
+            
+            nn.Conv3d(8, 16, 3, padding=1),
+            # Size 16@15x20x15
+            nn.BatchNorm3d(16),
+            nn.LeakyReLU(),
+            PadMaxPool3d(2, 2),
+            # Size 16@8x10x8)
+            
+            nn.Conv3d(16, 32, 3, padding=1),
+            # Size 32@8x10x8
+            nn.BatchNorm3d(32),
+            nn.LeakyReLU(),
+            PadMaxPool3d(2, 2),
+            # Size 32@4x5x4
+            
+        )
+        
+        self.linear = nn.Sequential(
+            nn.Dropout(p=0.5),
+            nn.Linear(32 * 4 * 5 * 4, 2)
+            
+        )
+        
+    def forward(self, x):
+        x = self.convolutions(x)
+        x = x.view(x.size(0), -1)
+        x = self.linear(x)
+        return x
 
 # %% [markdown]
 # # Train & Test
@@ -631,10 +695,22 @@ def train(model, train_loader, criterion, optimizer, n_epochs):
         train_loader.dataset.train()
         for i, data in enumerate(train_loader, 0):
             # Complete the train iteration
+            # Retrieve mini-batch and put data on GPU with .cuda()
+            images, labels = data['image'].cuda(), data['label'].cuda()
+            # Forward pass
+            outputs = model(images)
+            # Loss computation
+            loss = criterion(outputs, labels)
+            # Back-propagation (gradients computation)
+            loss.backward()
+            # Parameters update
+            optimizer.step()
+            # Erase previous gradients
+            optimizer.zero_grad()
 
         _, train_metrics = test(model, train_loader, criterion)
 
-        print('Epoch %i: loss = %f, balanced accuracy = %f' 
+        print(f'Epoch %i: loss = %f, balanced accuracy = %f' 
               % (epoch, train_metrics['mean_loss'],
                  train_metrics['balanced_accuracy']))
 
@@ -741,7 +817,7 @@ train_datasetLeftHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetLeftHC = MRIDataset(img_dir, valid_df, transform=transform)
 
 # Try different learning rates
-learning_rate = ...
+learning_rate = 10**-4 # e.g.: 10**-1, 10**-2, 10**-3
 n_epochs = 30
 batch_size = 4
 
@@ -797,7 +873,7 @@ transform = CropRightHC(2)
 train_datasetRightHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetRightHC = MRIDataset(img_dir, valid_df, transform=transform)
 
-learning_rate = ...
+learning_rate = 10**-4 # e.g.: 10**-1, 10**-2, 10**-3
 n_epochs = 30
 batch_size = 4
 
@@ -1006,13 +1082,24 @@ def trainAE(model, train_loader, criterion, optimizer, n_epochs):
         model.train()
         train_loader.dataset.train()
         for i, data in enumerate(train_loader, 0):
-            @TODO
+            # ToDo
             # Complete the training function in a similar way
             # than for the CNN classification training.
+            # Retrieve mini-batch
+            images, labels = data['image'].cuda(), data['label'].cuda()
+            # Forward pass + loss computation
+            _, outputs = model((images))
+            loss = criterion(outputs, images)
+            # Back-propagation
+            loss.backward()
+            # Parameters update
+            optimizer.step()
+            # Erase previous gradients
+            optimizer.zero_grad()
 
         mean_loss = testAE(model, train_loader, criterion)
 
-        print('Epoch %i: loss = %f' % (epoch, mean_loss))
+        print(f'Epoch %i: loss = %f' % (epoch, mean_loss))
 
         if mean_loss < train_best_loss:
             best_model = deepcopy(model)
@@ -1049,7 +1136,7 @@ def testAE(model, data_loader, criterion):
     
     return total_loss / len(data_loader.dataset) / np.product(data_loader.dataset.size)
 
-
+# %%
 learning_rate = 10**-2
 n_epochs = 30
 batch_size = 4
@@ -1072,7 +1159,7 @@ import nibabel as nib
 from scipy.ndimage import rotate
 
 subject = 'sub-OASIS10003'
-preprocessed_pt = torch.load('OASIS-1_dataset/preprocessed/%s_ses-M00_' % subject +
+preprocessed_pt = torch.load(f'OASIS-1_dataset/preprocessed/{subject}_ses-M00_' +
                     'T1w_segm-graymatter_space-Ixi549Space_modulated-off_' +
                     'probability.pt')
 input_pt = CropLeftHC()(preprocessed_pt).unsqueeze(0).cuda()
@@ -1083,14 +1170,14 @@ slice_0 = input_pt[0, 0, 15, :, :].cpu()
 slice_1 = input_pt[0, 0, :, 20, :].cpu()
 slice_2 = input_pt[0, 0, :, :, 15].cpu()
 show_slices([slice_0, slice_1, slice_2])
-plt.suptitle('Center slices of the input image of subject %s' % subject)
+plt.suptitle(f'Center slices of the input image of subject {subject}')
 plt.show()
 
 slice_0 = output_pt[0, 0, 15, :, :].cpu().detach()
 slice_1 = output_pt[0, 0, :, 20, :].cpu().detach()
 slice_2 = output_pt[0, 0, :, :, 15].cpu().detach()
 show_slices([slice_0, slice_1, slice_2])
-plt.suptitle('Center slices of the output image of subject %s' % subject)
+plt.suptitle(f'Center slices of the output image of subject {subject}')
 plt.show()
 
 
@@ -1128,8 +1215,9 @@ def compute_dataset_features(data_loader, model):
 
     return concat_codes_np, concat_labels_np, concat_names
 
-
-train_codes, train_labels, names = compute_dataset_features(train_loaderBothHC, best_AEBothHC)
+#%%
+# train_codes, train_labels, names = compute_dataset_features(train_loaderBothHC, best_AEBothHC)
+train_codes, train_labels, names = compute_dataset_features(train_loaderLeftHC, best_AELeftHC)
 
 # %% [markdown]
 # Then the model will fit the training codes and build two clusters. The labels
@@ -1138,12 +1226,12 @@ train_codes, train_labels, names = compute_dataset_features(train_loaderBothHC, 
 # %%
 from sklearn import mixture
 
-components = 2
-model = mixture.GaussianMixture(components)
-model.fit(X)
-Y_pred = model.predict(X)
+n_components = 2
+model = mixture.GaussianMixture(n_components)
+model.fit(train_codes)
+train_predict = model.predict(train_codes)
 
-metrics = compute_metrics(Y, Y_pred)
+metrics = compute_metrics(train_labels, train_predict)
 print(metrics)
 
 # %% [markdown]
@@ -1167,7 +1255,7 @@ merged_df = data_df.merge(OASIS_df.set_index('participant_id'), how='inner', on=
 plt.title('Clustering values according to age and MMS score')
 for component in range(n_components):
     predict_df = merged_df[merged_df.predicted_label == str(component)]
-    plt.plot(predict_df['age_bl'], predict_df['MMS'], 'o', label="cluster %i" % component)
+    plt.plot(predict_df['age_bl'], predict_df['MMS'], 'o', label=f"cluster {component}")
 plt.legend()
 plt.xlabel('age')
 plt.ylabel('MMS')
@@ -1178,3 +1266,5 @@ plt.show()
 # right hippocampus, perform further dimension reduction or remove age effect
 # like in [(Moradi et al,
 # 2015)](https://www.researchgate.net/publication/266374876_Machine_learning_framework_for_early_MRI-based_Alzheimer%27s_conversion_prediction_in_MCI_subjects)...
+
+# %%
