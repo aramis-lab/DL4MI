@@ -18,7 +18,7 @@
 # The goal of this lab session is to train a network that will perform a binary
 # classification between control participants and patients that are affected by
 # Alzheimer's disease. The input of the network is a neuroimaging modality: the
-# T1 weighted MRI. In this project we use the [pytorch
+# T1 weighted MRI. In this project we use the [Pytorch
 # library](https://pytorch.org/).
 
 # %%
@@ -60,11 +60,16 @@ from copy import deepcopy
 # - The CDR (Clinical Dementia Rating), that is null if the participant is
 # non-demented and of 0.5, 1, 2 and 3 for very mild, mild, moderate and severe
 # dementia, respectively.
-
+#
+# Let's explore the data:
 # %%
 # Load the complete dataset
 OASIS_df = pd.read_csv('OASIS-1_dataset/tsv_files/lab_1/OASIS_BIDS.tsv', sep='\t')
-
+# Show first items of the table
+print(OASIS_df.head())
+# First visual inspection
+_ = OASIS_df.hist(figsize=(20, 14))  
+# %%
 # Study the characteristics of the AD & CN populations (age, sex, MMS, cdr_global)
 def characteristics_table(df, merged_df):
     """Creates a DataFrame that summarizes the characteristics of the DataFrame df"""
@@ -235,7 +240,8 @@ preprocessed_pt = torch.load(f'OASIS-1_dataset/preprocessed/{subject}_ses-M00_' 
                     'T1w_segm-graymatter_space-Ixi549Space_modulated-off_' +
                     'probability.pt')
 raw_nii = nib.load(f'OASIS-1_dataset/raw/{subject}_ses-M00_T1w.nii.gz')
-raw_np = raw_nii.get_data()
+
+raw_np = raw_nii.get_fdata()
 
 def show_slices(slices):
     """ Function to display a row of image slices """
@@ -280,11 +286,9 @@ valid_df = pd.read_csv('OASIS-1_dataset/tsv_files/lab_1/validation.tsv', sep='\t
 
 train_population_df = characteristics_table(train_df, OASIS_df)
 valid_population_df = characteristics_table(valid_df, OASIS_df)
-print("Train")
-print(train_population_df)
-print()
-print("Validation")
-print(valid_population_df)
+
+print(f"Train dataset:\n {train_population_df}\n")
+print(f"Validation dataset:\n {valid_population_df}")
 
 # %% [markdown]
 # We can observe that our dataset is biased: the AD and CN populations do 
@@ -305,11 +309,10 @@ valid_df = valid_df[valid_df.age_bl >= 62]
 
 train_population_df = characteristics_table(train_df, OASIS_df)
 valid_population_df = characteristics_table(valid_df, OASIS_df)
-print("Train")
-print(train_population_df)
-print()
-print("Validation")
-print(valid_population_df)
+
+print(f"Train dataset:\n {train_population_df}\n")
+print(f"Validation dataset:\n {valid_population_df}")
+
 # %% [markdown]
 # # 2. Model
 # We propose here to design a convolutional neural network that takes for input
