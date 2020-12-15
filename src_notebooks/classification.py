@@ -13,7 +13,7 @@
 # ---
 
 # %% [markdown]
-# # Classification of Alzheimer's disease diagnosis
+# # 0. Classification of Alzheimer's disease diagnosis
 #
 # The goal of this lab session is to train a network that will perform a binary
 # classification between control participants and patients that are affected by
@@ -266,7 +266,7 @@ plt.suptitle(f'Center slices of left HC of subject {subject}')
 plt.show()
 
 # %% [markdown]
-# # Cross-validation
+# # 1. Cross-validation
 #
 # In order to choose hyperparameters the set of images is divided into a
 # training set (80%) and a validation set (20%). The data split was performed
@@ -311,7 +311,7 @@ print()
 print("Validation")
 print(valid_population_df)
 # %% [markdown]
-# # Model
+# # 2. Model
 # We propose here to design a convolutional neural network that takes for input
 # a patch centered on the left hippocampus of size 30x40x30. The architecture
 # of the network was found using a Random Search on architecture + optimization
@@ -652,7 +652,7 @@ class CustomNetwork(nn.Module):
         return x
 
 # %% [markdown]
-# # Train & Test
+# # 3. Train & Test
 #
 # Complete the `train` method in order to iteratively update the weights of the
 # network.
@@ -925,7 +925,7 @@ print(valid_metrics)
 # hyperparameters are set on an independent set (test set).
 
 # %% [markdown]
-# # Clustering on AD & CN populations
+# # 4. Clustering on AD & CN populations
 #
 # The classification results above were obtained in a supervised way:
 # neurologists examine the participants of OASIS and gave a diagnosis depending
