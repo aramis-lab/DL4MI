@@ -19,7 +19,7 @@ pipeline {
           sh '''#!/usr/bin/env bash
              set +x
              eval "$(conda shell.bash hook)"
-             conda create -y -n jb_env python=3.8
+             conda create -y -n jb_env python=3.7
              conda activate jb_env
              pip install clinicadl
              pip install jupyterlab
