@@ -6,7 +6,7 @@ pipeline {
   agent none
     stages {
       stage('Create Conda env') {
-        agent { label 'linux && cpu' }
+        agent { label 'linux && gpu' }
         environment {
            PATH = "$HOME/miniconda/bin:$PATH"
            }
@@ -29,7 +29,7 @@ pipeline {
         }
       }
       stage('Build') {
-        agent { label 'linux && cpu' }
+        agent { label 'linux && gpu' }
         environment {
           PATH = "$HOME/miniconda/bin:$PATH"
           GIT_SSH_COMMAND = 'ssh -i /builds/.ssh/github_idrsa'
@@ -50,7 +50,7 @@ pipeline {
         }
       }
       stage('Deploy') {
-        agent { label 'linux && cpu' }
+        agent { label 'linux && gpu' }
         environment {
           PATH = "$HOME/miniconda/bin:$PATH"
           }
