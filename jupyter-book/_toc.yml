@@ -3,7 +3,7 @@
 
 - part: Background and resources
   chapters:
-    - file: notebooks/background
+    - file: background
 
 - part: Part 1 - Classification in the context of computer-aided diagnosis
   chapters:
