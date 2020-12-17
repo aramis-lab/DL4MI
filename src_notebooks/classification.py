@@ -31,6 +31,9 @@ from os import path
 from torchvision import transforms
 import random
 from copy import deepcopy
+import urllib.request
+import ssl
+import tarfile
 
 # %% [markdown]
 # ## Database
@@ -45,7 +48,11 @@ from copy import deepcopy
 # command to download them.
 
 # %%
-! git clone https://github.com/14thibea/OASIS-1_dataset.git
+gcontext = ssl.SSLContext()
+dataseturl = "https://aramislab.paris.inria.fr/files/data/databases/DL4MI/OASIS-1-dataset.tar.gz"
+fstream = urllib.request.urlopen(dataseturl, context=gcontext)
+tarfile = tarfile.open(fileobj=fstream, mode="r:gz")
+tarfile.extractall()
 
 # %% [markdown]
 # One crucial step before training a neural network is to check the dataset.

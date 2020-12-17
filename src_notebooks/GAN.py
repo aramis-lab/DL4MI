@@ -35,15 +35,17 @@
 # %% [markdown]
 # # 0. Fetching the dataset
 #
-# The dataset can be found on this
+# The dataset can be found on this 
+# [server](https://aramislab.paris.inria.fr/files/data/databases/DL4MI/IXI-dataset.tar.gz) 
+# and alternatively in the following
 # [GitHub repository](https://github.com/Easternwen/IXI-dataset).
 # In the `size64` folder, there are 1154 files: 2 images for 577 subjects.
 # The size of each image is (64, 64).
 #
-# Let's clone the repository and have a look at the data.
+# Let's download the file and have a look at the data.
 
 # %%
-# Get the dataset from the GitHub repository
+# Get the dataset from the server
 ! git clone https://github.com/Easternwen/IXI-dataset.git
 
 # %% [markdown]
