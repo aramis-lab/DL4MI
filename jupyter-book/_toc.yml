@@ -1,7 +1,11 @@
 - file: index
   title: Deep Learning for Medical Imaging
 
-- part: Part 1 - Classification in the context of computer-aided diagnosis 
+- part: Background and resources
+  chapters:
+    - file: notebooks/background
+
+- part: Part 1 - Classification in the context of computer-aided diagnosis
   chapters:
     - file: notebooks/classification
 
