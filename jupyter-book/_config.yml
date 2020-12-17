@@ -30,6 +30,7 @@ execute:
   cache                     : "_build/.jupyter_cache/"  # A path to the jupyter cache that will be used to store execution artifacs. Defaults to `_build/.jupyter_cache/`
   exclude_patterns:
     - 'background' 
+  timeout: 240    
 
 html:
   #favicon: _static/favicon.ico
