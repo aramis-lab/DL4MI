@@ -378,7 +378,7 @@ def train_generator(train_loader, test_loader, num_epoch=500,
     # Loss function
     criterion = torch.nn.L1Loss()  # A loss for a voxel-wise comparison of images like torch.nn.L1Loss
 
-    # Initialize generator and discriminator
+    # Initialize the generator
     generator = GeneratorUNet()
 
     if cuda:
@@ -387,7 +387,7 @@ def train_generator(train_loader, test_loader, num_epoch=500,
 
     # Optimizer
     optimizer = torch.optim.Adam(generator.parameters(),
-                                   lr=lr, betas=(beta1, beta2))
+                                 lr=lr, betas=(beta1, beta2))
 
     def sample_images(epoch):
         """Saves a generated sample from the validation set"""
@@ -491,9 +491,10 @@ plt.show()
 
 # %% [markdown]
 # After doing visual quality control, it is a good idea to quantify the quality
-# of the generated images using specific metrics. The most popular metrics are
-# Mean Absolute Error (MAE), Peak Signal-to-Noise Ratio (PSNR) and Structural
-# Similarity index (SSIM):
+# of the generated images using specific metrics. Some popular metrics include
+# the Mean Absolute Error (MAE), the Peak Signal-to-Noise Ratio (PSNR) and
+# the Structural Similarity index (SSIM):
+#
 # * MAE = $\displaystyle \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m \vert T_{ij} - G_{ij} \vert $
 #
 # * PSNR = $\displaystyle -10 \log_{10} \left( \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m (T_{ij} - G_{ij})^2 \right) $
@@ -520,14 +521,8 @@ plt.show()
 #
 # For those interested, you can find [here](https://www.pyimagesearch.com/2014/09/15/python-compare-two-images/)
 # a reference to better understand the differences between these metrics.
-
-# %% [markdown]
-# <div class="alert alert-block alert-info">
-#  <b>Exercise</b>: Define a function for each metric mentioned above and
-#  evaluate the quality of the generated images on the training and test
-#  sets. Compute the metrics for each image individually and find the best
-#  and worst generated images according to these metrics.
-# </div>
+#
+# We provide an implementation for each metric with the functions below.
 
 # %%
 def mean_absolute_error(image_true, image_generated):
@@ -961,7 +956,7 @@ plt.gca().invert_yaxis()
 plt.show()
 
 # %% [markdown]
-# We will now evaluate the generator of the CGAN with the same three metrics
+# We will now evaluate the generator of the cGAN with the same three metrics
 # on both the training set and the test set by computing the mean value for
 # each metric:
 
@@ -1075,7 +1070,7 @@ summary(DiscriminatorCycle().cuda(), [(1, 64, 64)])
 
 # %%
 def train_cyclegan(train_loader, test_loader, num_epoch=500,
-          lr=0.0001, beta1=0.9, beta2=0.999):
+                   lr=0.0001, beta1=0.9, beta2=0.999):
     """Train a CycleGAN.
 
     Args:
@@ -1314,5 +1309,3 @@ evaluate_generator(generator_cyclegan)
 # <a href="https://ibb.co/Q8FrRrd">
 #   <img src="https://i.ibb.co/6vRgxgB/style-transfer.png" width="800" border="0">
 #</a>
-
-# %%
