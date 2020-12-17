@@ -33,7 +33,7 @@ used to optimize the parameters of the network.
 Deep learning networks are a succession of functions (called **layers**) which
 transform their inputs into outputs (called **feature maps**).
 There are two types of layers:
-#
+
 - Layers including learnable parameters that will be updated to improve the
   loss (for example convolutions).
 - Layers with fixed behaviour during the whole training process (for example
@@ -56,7 +56,7 @@ disease](https://aramislab.paris.inria.fr/clinicadl/tuto/intro.html) tutorial.
 ## Alzheimer’s disease
 
 ### Clinical context
-#
+
 *
 *
 *
