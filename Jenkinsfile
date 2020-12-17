@@ -42,6 +42,7 @@ pipeline {
              eval "$(conda shell.bash hook)" 
              conda activate jb_env
              cd jupyter-book
+             mkdir _build/.jupyter_cache
              make
              sed -i 's+github/aramis-lab/DL4MI/blob/main/jupyter-book/notebooks+github/aramis-lab/DL4MI/blob/main/notebooks+g' _build/html/notebooks/*.html
              conda deactivate

@@ -75,7 +75,15 @@ OASIS_df = pd.read_csv('OASIS-1_dataset/tsv_files/lab_1/OASIS_BIDS.tsv', sep='\t
 # Show first items of the table
 print(OASIS_df.head())
 # First visual inspection
-_ = OASIS_df.hist(figsize=(20, 14))  
+_ = OASIS_df.hist(figsize=(20, 14))
+# %% [markdown]
+# From these first graphics, it's possible to have an initial idea of the
+# disrtibution of the data. For example, the eduacational level is well distributed
+# among the participants of the study. Also most of the subject are young and healthy
+# (MNS score equal 30 and CDR score equal 0).
+#
+# The next cell will create a function that summarizes the characteristics of the 
+# population in this dataset. We will use it later.
 # %%
 # Study the characteristics of the AD & CN populations (age, sex, MMS, cdr_global)
 def characteristics_table(df, merged_df):
@@ -862,7 +870,7 @@ print(train_metricsLeftHC)
 
 # %%
 valid_resultsLeftHC_df = valid_resultsLeftHC_df.merge(OASIS_df, how='left', on='participant_id', sort=False)
-valid_resultsLeftHC_old_df = valid_resultsLeftHC_df[(valid_resultsLeftHC_df.age_bl_x >= 62)]
+valid_resultsLeftHC_old_df = valid_resultsLeftHC_df[(valid_resultsLeftHC_df.age_bl >= 62)]
 compute_metrics(valid_resultsLeftHC_old_df.true_label, valid_resultsLeftHC_old_df.predicted_label)
 
 # %% [markdown]
