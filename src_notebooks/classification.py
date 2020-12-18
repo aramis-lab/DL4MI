@@ -13,6 +13,13 @@
 # ---
 
 # %% [markdown]
+# ```{note}
+# (if running in Colab, think of changing the runtime type before starting, in
+# order  to have access to GPU ressources: Runtime->Change Runtime Type, then
+# chose GPU for Hardware accelerator).
+# ```
+#
+# %% [markdown]
 # # 0. Classification of Alzheimer's disease diagnosis
 #
 # The goal of this lab session is to train a network that will perform a binary
