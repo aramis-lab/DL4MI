@@ -38,20 +38,18 @@ A new browser window opens, choose the wished notebook from the folder
 ````
 
 ````{tabbed} Run in Colab
-When the content of the page is interactive, hover over the rocket icon <i
-class=\"fa fa-rocket\" aria-hidden=\"true\"></i> at the
-top of the page an click "Colab" to open a cloud version of the same page.
-Colab notebooks are very similat to jupyter notebooks and the content can be
-executet cell by cell by clicking Ctrl-Enter (or Cmd-Enter).
+When the content of the page is interactive, hover over the rocket icon 
+<i class="fa fa-rocket" aria-hidden="true"></i>
+at the top of the page an click "Colab" to open a cloud version of the same
+page.  Colab notebooks are very similat to jupyter notebooks and the content
+can be executet cell by cell by clicking Ctrl-Enter (or Cmd-Enter).
 
 You need to login with a Google account and authorize to link with github.
 
-Rememeber to choose a runtime with GPU (Runtime menu -> "Change runtume type). 
+Rememeber to choose a runtime with GPU (Runtime menu -> *"Change runtime type"*. 
 ````
 
 
-
-To run i
 ```{admonition} Prerequisite
 Programming knowledge in Python, basics usage of PyTorch ([see
 here](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html)).
