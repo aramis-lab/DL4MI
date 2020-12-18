@@ -18,25 +18,6 @@ To run interactively the content of this book yo have two options: run locally
 or use Colab (in both cases we assume that the host running the notebooks has a
 GPU card).
 
-````{tabbed} Run Locally
-* Clone the repository:
-```
-git clone https://github.com/aramis-lab/DL4MI.git
-```
-
-* Install the dependencies
-```
-pip install jupyter-book/requirements.txt
-```
-
-* Launch jupyterlab or jupyter notebook
-```
-jupyter lab
-```
-A new browser window opens, choose the wished notebook from the folder
-`notebooks`.
-````
-
 ````{tabbed} Run in Colab
 * When the content of the page is interactive, hover over the rocket icon 
   <i class="fa fa-rocket" aria-hidden="true"></i>
@@ -47,9 +28,28 @@ A new browser window opens, choose the wished notebook from the folder
 * You need to login with a Google account and authorize to link with github.
 
 * Rememeber to choose a runtime with GPU (Runtime menu -> *"Change runtime
-  type"*. 
+  type"*). 
 ````
 
+````{tabbed} Run Locally
+* Clone the repository:
+```
+git clone https://github.com/aramis-lab/DL4MI.git
+```
+
+* Install the dependencies
+```
+cd DL4MI
+pip install ./jupyter-book/requirements.txt
+```
+
+* Launch jupyterlab or jupyter notebook
+```
+jupyter lab
+```
+A new browser window will open, choose the correponding notebook from the folder
+`notebooks`.
+````
 
 ```{admonition} Prerequisite
 Programming knowledge in Python, basics usage of PyTorch ([see
