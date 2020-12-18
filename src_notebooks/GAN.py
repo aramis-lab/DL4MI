@@ -457,7 +457,7 @@ def train_generator(train_loader, test_loader, num_epoch=500,
 
     return generator
 
-# %% {tags="hide-output"}
+# %% {tags="remove-stdout"}
 # Parameters for Adam optimizer
 lr = 0.0002
 beta1 = 0.5
