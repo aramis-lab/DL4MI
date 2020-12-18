@@ -13,9 +13,9 @@
 
 # %% [markdown]
 # ```{note}
-# (if running in Colab, think of changing the runtime type before starting, in
+# If running in Colab, think of changing the runtime type before starting, in
 # order  to have access to GPU ressources: Runtime->Change Runtime Type, then
-# chose GPU for Hardware accelerator).
+# chose GPU for hardware accelerator.
 # ```
 #
 # %% [markdown]
