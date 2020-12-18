@@ -77,13 +77,14 @@ print(OASIS_df.head())
 # First visual inspection
 _ = OASIS_df.hist(figsize=(20, 14))
 # %% [markdown]
-# From these first graphics, it's possible to have an initial idea of the
-# disrtibution of the data. For example, the eduacational level is well distributed
-# among the participants of the study. Also most of the subject are young and healthy
-# (MNS score equal 30 and CDR score equal 0).
+# From these graphics, it's possible to have an overview of the distribution of
+# the data, for the numerical values. For example, the educational level is
+# well distributed among the participants of the study. Also, most of the
+# subject are young and healthy (MNS score equal 30 and CDR score equal 0).
 #
-# The next cell will create a function that summarizes the characteristics of the 
-# population in this dataset. We will use it later.
+# The next cell will create (and run) a function (`characteristics_table`) that
+# highlights the main features of the population in the dataset. We will use it
+# later.
 # %%
 # Study the characteristics of the AD & CN populations (age, sex, MMS, cdr_global)
 def characteristics_table(df, merged_df):
