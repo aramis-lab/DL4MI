@@ -55,5 +55,7 @@ Programming knowledge in Python, basics usage of PyTorch ([see
 here](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html)).
 ```
 
+## Content
+
 ```{tableofcontents}
 ```
