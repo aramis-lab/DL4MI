@@ -208,6 +208,7 @@ class IXIDataset(torch.utils.data.Dataset):
 # </a>
 
 # %% [markdown]
+#
 # <div class="alert alert-block alert-info">
 # <b>Exercise</b>: Create a <code>GeneratorUNet</code> class to define the
 # generator with the architecture given above.
@@ -457,6 +458,9 @@ def train_generator(train_loader, test_loader, num_epoch=500,
     return generator
 
 # %%
+# ---
+# tags: [hide-output, show-input]
+# ---
 # Parameters for Adam optimizer
 lr = 0.0002
 beta1 = 0.5
