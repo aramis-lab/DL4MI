@@ -1,4 +1,6 @@
-# Intro
+![Deep Learning for Medical Imaging](images/DL4MI_banner.jpg)
+
+# Overview
 
 This practical session will cover two applications of deep learning for medical
 imaging: *classification in the context of computer-aided diagnosis* and *image
