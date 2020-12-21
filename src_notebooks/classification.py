@@ -143,7 +143,7 @@ print(population_df)
 # 3. Conversion to tensor format (.pt)
 #
 # The preprocessed images all have the same size (121x145x121). You will find
-# below a Dataset that allow to browse easily the database.
+# below a *class* calle `MRIDataset` that allows to browse easily the database.
 
 # %%
 from torch.utils.data import Dataset, DataLoader, sampler
