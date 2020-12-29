@@ -56,7 +56,7 @@ import tarfile
 
 # %%
 gcontext = ssl.SSLContext()
-dataseturl = "https://aramislab.paris.inria.fr/files/data/databases/DL4MI/OASIS-1-dataset.tar.gz"
+dataseturl = "https://aramislab.paris.inria.fr/files/data/databases/DL4MI/OASIS-1-dataset_pt_new.tar.gz" 
 fstream = urllib.request.urlopen(dataseturl, context=gcontext)
 tarfile = tarfile.open(fileobj=fstream, mode="r:gz")
 tarfile.extractall()
@@ -169,7 +169,9 @@ class MRIDataset(Dataset):
         
         participant_id = self.data_df.loc[idx, 'participant_id']
         session_id = self.data_df.loc[idx, 'session_id']
-        filename = participant_id + '_' + session_id + \
+        filename = 'subjects/' + participant_id + '/' + session_id + '/' + \
+          'deeplearning_prepare_data/image_based/custom/' + \
+          participant_id + '_' + session_id + \
           '_T1w_segm-graymatter_space-Ixi549Space_modulated-off_probability.pt'
 
         image = torch.load(path.join(self.img_dir, filename))
@@ -259,7 +261,9 @@ import nibabel as nib
 from scipy.ndimage import rotate
 
 subject = 'sub-OASIS10003'
-preprocessed_pt = torch.load(f'OASIS-1_dataset/preprocessed/{subject}_ses-M00_' +
+preprocessed_pt = torch.load(f'OASIS-1_dataset/CAPS/subjects/{subject}/ses-M00/' +
+                    'deeplearning_prepare_data/image_based/custom/' + subject +
+                    '_' + 'ses-M00_'+
                     'T1w_segm-graymatter_space-Ixi549Space_modulated-off_' +
                     'probability.pt')
 raw_nii = nib.load(f'OASIS-1_dataset/raw/{subject}_ses-M00_T1w.nii.gz')
