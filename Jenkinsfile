@@ -45,7 +45,7 @@ pipeline {
              cd jupyter-book
              mkdir -p _build/.jupyter_cache
              make
-             sed -i 's+github/aramis-lab/DL4MI/blob/main/jupyter-book/notebooks+github/aramis-lab/DL4MI/blob/main/notebooks+g' _build/html/notebooks/*.html
+             sed -i 's+github/aramis-lab/DL4MI/blob/main/jupyter-book/notebooks+github/aramis-lab/DL4MI/blob/student-version-test/notebooks+g' _build/html/notebooks/*.html
              conda deactivate
              '''
           stash(name: 'doc_html', includes: 'jupyter-book/_build/html/**')
