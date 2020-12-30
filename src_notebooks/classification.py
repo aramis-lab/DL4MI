@@ -263,7 +263,7 @@ from scipy.ndimage import rotate
 subject = 'sub-OASIS10003'
 preprocessed_pt = torch.load(f'OASIS-1_dataset/CAPS/subjects/{subject}/ses-M00/' +
                     'deeplearning_prepare_data/image_based/custom/' + subject +
-                    '_' + 'ses-M00_'+
+                    '_ses-M00_'+
                     'T1w_segm-graymatter_space-Ixi549Space_modulated-off_' +
                     'probability.pt')
 raw_nii = nib.load(f'OASIS-1_dataset/raw/{subject}_ses-M00_T1w.nii.gz')
@@ -369,7 +369,7 @@ print(f"Validation dataset:\n {valid_population_df}")
 # Pytorch which stacks the 4D tensors computed by a `Dataset`.
 
 # %% 
-img_dir = path.join('OASIS-1_dataset', 'preprocessed')
+img_dir = path.join('OASIS-1_dataset', 'CAPS')
 batch_size=4
 
 example_dataset = MRIDataset(img_dir, OASIS_df, transform=CropLeftHC())
@@ -837,10 +837,10 @@ def compute_metrics(ground_truth, prediction):
 # set it may have a negative impact on loss convergence [(Keskar et al,
 # 2016)](https://arxiv.org/abs/1609.04836). 
 #
-# Construction of dataset objects
+# Construction of dataset objects:
 
 # %%
-img_dir = path.join('OASIS-1_dataset', 'preprocessed')
+img_dir = path.join('OASIS-1_dataset', 'CAPS')
 transform = CropLeftHC(2)
 
 train_datasetLeftHC = MRIDataset(img_dir, train_df, transform=transform)
@@ -889,7 +889,7 @@ compute_metrics(valid_resultsLeftHC_old_df.true_label, valid_resultsLeftHC_old_d
 # If this is not the case, you have to think again about your framework and
 # eventually retrain your network...
 
-# %%[markdown]
+# %% [markdown]
 # ## Train Classification with Right HC
 #
 # Another network can be trained on a cropped image around the right HC
@@ -1189,7 +1189,9 @@ import nibabel as nib
 from scipy.ndimage import rotate
 
 subject = 'sub-OASIS10003'
-preprocessed_pt = torch.load(f'OASIS-1_dataset/preprocessed/{subject}_ses-M00_' +
+preprocessed_pt = torch.load(f'OASIS-1_dataset/CAPS/subjects/{subject}/ses-M00/' +
+                    'deeplearning_prepare_data/image_based/custom/' + subject +
+                    '_ses-M00_'+
                     'T1w_segm-graymatter_space-Ixi549Space_modulated-off_' +
                     'probability.pt')
 input_pt = CropLeftHC()(preprocessed_pt).unsqueeze(0).cuda()
