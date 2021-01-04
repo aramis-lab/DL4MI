@@ -51,8 +51,10 @@ import tarfile
 # - CN (Cognitively Normal) for healthy participants.
 # - AD (Alzheimer's Disease) for patients affected by Alzheimer's disease.
 #
-# All the preprocessed images we use were put on github, run the following
-# command to download them.
+# The original images were preprocessed using [Clinica](http://www.clinica.run/): 
+# a software platform for clinical neuroimaging studies. 
+# Preprocessed images and other files are distributed in a tarball, run 
+# the following command to download it.
 
 # %%
 gcontext = ssl.SSLContext()
@@ -138,12 +140,26 @@ print(population_df)
 # images to train the network in this lab session, the preprocessing here is
 # very extensive. More specifically, the images encountered:
 #
-# 1. Non-linear registration
-# 2. Segmentation of grey matter
-# 3. Conversion to tensor format (.pt)
+# 1. Non-linear registration.
+# 2. Segmentation of grey matter.
+# 3. Conversion to tensor format (.pt).
 #
-# The preprocessed images all have the same size (121x145x121). You will find
-# below a *class* calle `MRIDataset` that allows to browse easily the database.
+# 
+# As mentioned above, to obtain the preprocessed images, we used some Clinica's
+# pipelines in order to: 
+#
+# 1. Convert the original dataset to BIDS format ([`clinica convert
+# oasis-2-bids`](http://www.clinica.run/doc/Converters/OASIS2BIDS/)).
+# 2. Get the non-linear registration and segmentation of grey mater (pipeline
+# [`t1-volume`](http://www.clinica.run/doc/Pipelines/T1_Volume/)).
+# 3. Obtain the preprocessed images in tensor format (pipeline
+# [`deeplearning-prepare-data`](https://aramislab.paris.inria.fr/clinica/docs/public/latest/Pipelines/DeepLearning_PrepareData/)).
+#
+#
+# The preprocessed images are store in the [CAPS
+# format](http://www.clinica.run/doc/CAPS/Introduction/) and all have the same
+# size (121x145x121). You will find below a *class* called `MRIDataset` that
+# allows to browse easily the database.
 
 # %%
 from torch.utils.data import Dataset, DataLoader, sampler
