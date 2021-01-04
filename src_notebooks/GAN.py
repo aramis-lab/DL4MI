@@ -24,7 +24,7 @@
 #
 # We will investigate three approaches to do so:
 #
-# 1. First, we will train an encoder.
+# 1. First, we will train a generator (or encoder-decoder).
 # 2. Then, we will train a conditional generative adversarial network (cGAN).
 # 3. Finally, we will train a cycle generative adversarial network (CycleGAN).
 #
@@ -957,7 +957,7 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
 
     return generator
 
-# %%
+# %% {"tags": ["remove_output"]}
 generator_cgan = train_cgan(train_loader, test_loader, num_epoch=num_epoch,
                             lr=lr, beta1=beta1, beta2=beta2)
 
@@ -1286,7 +1286,7 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
 
     return generator_from_t1_to_t2
 
-# %%
+# %% {"tags": ["remove_output"]}
 generator_cyclegan = train_cyclegan(
     train_loader, test_loader, num_epoch=num_epoch,
     lr=lr, beta1=beta1, beta2=beta2
