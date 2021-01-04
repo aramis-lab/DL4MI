@@ -89,7 +89,7 @@ _ = OASIS_df.hist(figsize=(20, 14))
 # From these graphics, it's possible to have an overview of the distribution of
 # the data, for the numerical values. For example, the educational level is
 # well distributed among the participants of the study. Also, most of the
-# subject are young and healthy (MNS score equal 30 and CDR score equal 0).
+# subjects are young (around 20 years old) and healthy (MMS score equals 30 and null CDR score).
 #
 # The next cell will create (and run) a function (`characteristics_table`) that
 # highlights the main features of the population in the dataset. We will use it
@@ -130,7 +130,7 @@ def characteristics_table(df, merged_df):
     return population_df
 
 population_df = characteristics_table(OASIS_df, OASIS_df)
-print(population_df)
+population_df
 
 # %% [markdown]
 # ## Preprocessing
@@ -168,10 +168,18 @@ from os import path
 class MRIDataset(Dataset):
     
     def __init__(self, img_dir, data_df, transform=None):
+        """
+
+        Args:
+            img_dir (str): path to the CAPS directory containing preprocessed images
+            data_df (DataFrame): metadata of the population.
+                Columns include participant_id, session_id and diagnosis).
+            transform (callable): list of transforms applied on-the-fly, chained with torchvision.transforms.Compose.
+        """
         self.img_dir = img_dir
         self.transform = transform
         self.data_df = data_df
-        self.label_code = {"AD":1, "CN":0}
+        self.label_code = {"AD": 1, "CN": 0}
 
         self.size = self[0]['image'].shape
         
@@ -278,8 +286,7 @@ from scipy.ndimage import rotate
 
 subject = 'sub-OASIS10003'
 preprocessed_pt = torch.load(f'OASIS-1_dataset/CAPS/subjects/{subject}/ses-M00/' +
-                    'deeplearning_prepare_data/image_based/custom/' + subject +
-                    '_ses-M00_'+
+                    f'deeplearning_prepare_data/image_based/custom/{subject}_ses-M00_' +
                     'T1w_segm-graymatter_space-Ixi549Space_modulated-off_' +
                     'probability.pt')
 raw_nii = nib.load(f'OASIS-1_dataset/raw/{subject}_ses-M00_T1w.nii.gz')
@@ -333,28 +340,6 @@ valid_population_df = characteristics_table(valid_df, OASIS_df)
 print(f"Train dataset:\n {train_population_df}\n")
 print(f"Validation dataset:\n {valid_population_df}")
 
-# %% [markdown]
-# We can observe that our dataset is biased: the AD and CN populations do 
-# not have the same age distributions at all! It becomes then very easy 
-# to differentiate them as the age regression between 20 and 95 years old is
-#  an easier task than AD vs CN classification.
-
-# To avoid this bias, the youngest participants of OASIS are removed from 
-# the training and validation DataFrames. More precisely, to match the AD
-# population in which the youngest participant is 62, all participants 
-# younger than 62 are removed.
-
-# %%
-train_df = train_df[['participant_id']].merge(OASIS_df, how='left', on='participant_id', sort=False)
-train_df = train_df[train_df.age_bl >= 62]
-valid_df = valid_df[['participant_id']].merge(OASIS_df, how='left', on='participant_id', sort=False)
-valid_df = valid_df[valid_df.age_bl >= 62]
-
-train_population_df = characteristics_table(train_df, OASIS_df)
-valid_population_df = characteristics_table(valid_df, OASIS_df)
-
-print(f"Train dataset:\n {train_population_df}\n")
-print(f"Validation dataset:\n {valid_population_df}")
 
 # %% [markdown]
 # # 2. Model
@@ -536,7 +521,7 @@ class PadMaxPool3d(nn.Module):
 
 
 # %% [markdown]
-# Here is an illustration of `PadMaxPool` behaviour, a column is added to avoid
+# Here is an illustration of `PadMaxPool` behaviour. If the number of columns is odd, a column is added to avoid
 # losing data:
 #
 # <a href="PadMaxPool behaviour"><img src="https://drive.google.com/uc?id=14R_LCTiV0N6ZXm-3wQCj_Gtc1LsXdQq_" style="height: 200px;"></a>
@@ -581,54 +566,6 @@ print("Bias shape \n", fc.bias.shape)
 
 
 # %% [markdown]
-# The max pooling module of pytorch does not deal with odd sizes, indeed when
-# the size is not a multiple of the stride (here 2) the last column is thrown.
-# To avoid this we use a custom module `PadMaxPool3d` instead of the standard
-# module `nn.MaxPooling3d`.
-
-# %%
-class PadMaxPool3d(nn.Module):
-    """A MaxPooling module which deals with odd sizes with padding"""
-    def __init__(self, kernel_size, stride, return_indices=False, return_pad=False):
-        super(PadMaxPool3d, self).__init__()
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.pool = nn.MaxPool3d(kernel_size, stride, return_indices=return_indices)
-        self.pad = nn.ConstantPad3d(padding=0, value=0)
-        self.return_indices = return_indices
-        self.return_pad = return_pad
-
-    def set_new_return(self, return_indices=True, return_pad=True):
-        self.return_indices = return_indices
-        self.return_pad = return_pad
-        self.pool.return_indices = return_indices
-
-    def forward(self, f_maps):
-        coords = [self.stride - f_maps.size(i + 2) % self.stride for i in range(3)]
-        for i, coord in enumerate(coords):
-            if coord == self.stride:
-                coords[i] = 0
-
-        self.pad.padding = (coords[2], 0, coords[1], 0, coords[0], 0)
-
-        if self.return_indices:
-            output, indices = self.pool(self.pad(f_maps))
-
-            if self.return_pad:
-                return output, indices, (coords[2], 0, coords[1], 0, coords[0], 0)
-            else:
-                return output, indices
-
-        else:
-            output = self.pool(self.pad(f_maps))
-
-            if self.return_pad:
-                return output, (coords[2], 0, coords[1], 0, coords[0], 0)
-            else:
-                return output
-
-
-# %% [markdown]
 # ## TODO Network design
 # Construct here the network corresponding to the scheme and the following
 # description:
@@ -646,17 +583,21 @@ class PadMaxPool3d(nn.Module):
 
 # %%
 # ToDo
+# begin{student version}
 class CustomNetwork(nn.Module):
     
     def __init__(self):
         super(CustomNetwork, self).__init__()
-        # Create the layers composing the network
+        # Create the layers composing the network.
+        # TIP: you can use Sequential to avoid naming all the layers one by one.
         pass
         
     def forward(self, x):
         # Compose the forward operation using the layers defined in __init__
         pass
+# end{student version}
 # %%
+# begin{correction version}
 class CustomNetwork(nn.Module):
     
     def __init__(self):
@@ -697,6 +638,7 @@ class CustomNetwork(nn.Module):
         x = self.linear(x)
         return x
 
+# end{correction version}
 # %% [markdown]
 # # 3. Train & Test
 #
@@ -719,6 +661,46 @@ class CustomNetwork(nn.Module):
 # doesn't mean that this would be the case on an independent test set.
 
 # %%
+# begin{student version}
+def train(model, train_loader, criterion, optimizer, n_epochs):
+    """
+    Method used to train a CNN
+
+    Args:
+        model: (nn.Module) the neural network
+        train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
+        criterion: (nn.Module) a method to compute the loss of a mini-batch of images
+        optimizer: (torch.optim) an optimization algorithm
+        n_epochs: (int) number of epochs performed during training
+
+    Returns:
+        best_model: (nn.Module) the trained neural network
+    """
+    best_model = deepcopy(model)
+    train_best_loss = np.inf
+
+    for epoch in range(n_epochs):
+        model.train()
+        train_loader.dataset.train()
+        for i, data in enumerate(train_loader, 0):
+            # Complete the train iteration
+
+        _, train_metrics = test(model, train_loader, criterion)
+
+        print(f'Epoch %i: loss = %f, balanced accuracy = %f'
+              % (epoch, train_metrics['mean_loss'],
+                 train_metrics['balanced_accuracy']))
+
+        if train_metrics['mean_loss'] < train_best_loss:
+            best_model = deepcopy(model)
+            train_best_loss = train_metrics['mean_loss']
+
+    return best_model
+
+
+# end{student version}
+
+# begin{correction version}
 def train(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train a CNN
@@ -740,7 +722,6 @@ def train(model, train_loader, criterion, optimizer, n_epochs):
         model.train()
         train_loader.dataset.train()
         for i, data in enumerate(train_loader, 0):
-            # Complete the train iteration
             # Retrieve mini-batch and put data on GPU with .cuda()
             images, labels = data['image'].cuda(), data['label'].cuda()
             # Forward pass
@@ -765,6 +746,7 @@ def train(model, train_loader, criterion, optimizer, n_epochs):
             train_best_loss = train_metrics['mean_loss']
     
     return best_model
+# end{correction version}
 
 def test(model, data_loader, criterion):
     """
@@ -863,7 +845,12 @@ train_datasetLeftHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetLeftHC = MRIDataset(img_dir, valid_df, transform=transform)
 
 # Try different learning rates
-learning_rate = 10**-4 # e.g.: 10**-1, 10**-2, 10**-3
+# begin{correction version}
+learning_rate = 10**-4
+# end{correction version}
+# begin{student version}
+learning_rate = ... # Try different learning rates between 10**-5 and 10**-3
+# end{student version}
 n_epochs = 30
 batch_size = 4
 
@@ -893,7 +880,7 @@ print(train_metricsLeftHC)
 # at 20 ! Then you should check that the performance of the network is still
 # good for the old population only.
 
-# Check accuracy of old participants (age > 62 to match the minimum of AD age
+# Check the accuracy on old participants (age > 62 to match the minimum of AD age
 # distribution)
 
 # %%
@@ -902,8 +889,9 @@ valid_resultsLeftHC_old_df = valid_resultsLeftHC_df[(valid_resultsLeftHC_df.age_
 compute_metrics(valid_resultsLeftHC_old_df.true_label, valid_resultsLeftHC_old_df.predicted_label)
 
 # %% [markdown]
-# If this is not the case, you have to think again about your framework and
-# eventually retrain your network...
+# If the accuracy on old participants is very different from the one you obtained before,
+# this could mean that your network is inefficient on the target population (persons older than 60).
+# You have to think again about your framework and eventually retrain your network...
 
 # %% [markdown]
 # ## Train Classification with Right HC
@@ -919,7 +907,12 @@ transform = CropRightHC(2)
 train_datasetRightHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetRightHC = MRIDataset(img_dir, valid_df, transform=transform)
 
-learning_rate = 10**-4 # e.g.: 10**-1, 10**-2, 10**-3
+# begin{correction version}
+learning_rate = 10**-4
+# end{correction version}
+# begin{student version}
+learning_rate = ... # You can reuse the same learning rate as before
+# end{student version}
 n_epochs = 30
 batch_size = 4
 
@@ -944,11 +937,12 @@ print(train_metricsRightHC)
 # combined. Here we can give both hippocampi the same weight.
 
 # %%
-def softvoting(df1, df2):
-    df1 = df1.set_index('participant_id', drop=True)
-    df2 = df2.set_index('participant_id', drop=True)
+# begin{correction version}
+def softvoting(leftHC_df, rightHC_df):
+    df1 = leftHC_df.set_index('participant_id', drop=True)
+    df2 = rightHC_df.set_index('participant_id', drop=True)
     results_df = pd.DataFrame(index=df1.index.values,
-                              columns=['true_label', 'predicted_label', 
+                              columns=['true_label', 'predicted_label',
                                        'proba0', 'proba1'])
     results_df.true_label = df1.true_label
     # Compute predicted label and probabilities
@@ -957,7 +951,12 @@ def softvoting(df1, df2):
     results_df.predicted_label = (0.5 * df1.proba1 + 0.5 * df2.proba1 > 0.5).astype(int)
 
     return results_df
+# end{correction version}
+# begin{student version}
+def softvoting(leftHC_df, rightHC_df):
+    # ToDo implement soft-voting with same weights on both hippocampi.
 
+# end{student version}
 
 valid_results = softvoting(valid_resultsLeftHC_df, valid_resultsRightHC_df)
 valid_metrics = compute_metrics(valid_results.true_label, valid_results.predicted_label)
@@ -967,8 +966,8 @@ print(valid_metrics)
 # %% [markdown]
 # Keep in mind that the validation set was used to set the hyperparameters
 # (learning rate, architecture), then validation metrics are biased. To have
-# unbiased results the entire framework should be evaluated when all the
-# hyperparameters are set on an independent set (test set).
+# unbiased results the entire framework should be evaluated on an independent
+#  set (test set).
 
 # %% [markdown]
 # # 4. Clustering on AD & CN populations
@@ -1107,10 +1106,11 @@ class AutoEncoder(nn.Module):
 # loss.
 
 # %%
+# begin{correction version}
 def trainAE(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train an AutoEncoder
-    
+
     Args:
         model: (nn.Module) the neural network
         train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
@@ -1150,8 +1150,46 @@ def trainAE(model, train_loader, criterion, optimizer, n_epochs):
         if mean_loss < train_best_loss:
             best_model = deepcopy(model)
             train_best_loss = mean_loss
+
+    return best_model
+# end{correction version}
+
+# begin{student version}
+def trainAE(model, train_loader, criterion, optimizer, n_epochs):
+    """
+    Method used to train an AutoEncoder
+    
+    Args:
+        model: (nn.Module) the neural network
+        train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
+        criterion: (nn.Module) a method to compute the loss of a mini-batch of images
+        optimizer: (torch.optim) an optimization algorithm
+        n_epochs: (int) number of epochs performed during training
+
+    Returns:
+        best_model: (nn.Module) the trained neural network.
+    """
+    best_model = deepcopy(model)
+    train_best_loss = np.inf
+
+    for epoch in range(n_epochs):
+        model.train()
+        train_loader.dataset.train()
+        for i, data in enumerate(train_loader, 0):
+            # ToDo Complete the training function in a similar way
+            # than for the CNN classification training.
+
+        mean_loss = testAE(model, train_loader, criterion)
+
+        print(f'Epoch %i: loss = %f' % (epoch, mean_loss))
+
+        if mean_loss < train_best_loss:
+            best_model = deepcopy(model)
+            train_best_loss = mean_loss
     
     return best_model
+# end{student version}
+
 
 def testAE(model, data_loader, criterion):
     """
@@ -1168,9 +1206,6 @@ def testAE(model, data_loader, criterion):
     """
     model.eval()
     data_loader.dataset.eval()
-    columns = ["participant_id", "proba0", "proba1",
-               "true_label", "predicted_label"]
-    results_df = pd.DataFrame(columns=columns)
     total_loss = 0
     
     with torch.no_grad():
@@ -1284,7 +1319,7 @@ print(metrics)
 
 # %% [markdown]
 # The accuracy may not be very good, this could mean that the framework
-# classified another characteristic that the one you tried to target.
+# clustered another characteristic that the one you tried to target.
 #
 # What is actually expected is that the clustering differenciation is made on
 # the level of atrophy, which is mostly correlated to the age but also to the
