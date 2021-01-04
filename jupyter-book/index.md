@@ -14,7 +14,7 @@ using generative adversarial networks.
 
 ## Running interactively the notebooks
 
-To run interactively the content of this book yo have two options: run locally
+To run interactively the content of this book you have two options: run it locally
 or use Colab (in both cases we assume that the host running the notebooks has a
 GPU card).
 
@@ -27,7 +27,7 @@ GPU card).
 
 * You need to login with a Google account and authorize to link with github.
 
-* Rememeber to choose a runtime with GPU (Runtime menu -> *"Change runtime
+* Remember to choose a runtime with GPU (Runtime menu -> *"Change runtime
   type"*). 
 ````
 
@@ -37,10 +37,17 @@ GPU card).
 git clone https://github.com/aramis-lab/DL4MI.git
 ```
 
+* Create a dedicated environment
+```
+conda create --name DL4MI  python=3.8
+conda activate DL4MI
+```
+
 * Install the dependencies
 ```
 cd DL4MI
-pip install ./jupyter-book/requirements.txt
+conda install nodejs
+pip install -r ./jupyter-book/requirements.txt
 ```
 
 * Launch jupyterlab or jupyter notebook
