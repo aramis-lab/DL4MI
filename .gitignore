@@ -1,3 +1,6 @@
+.idea
+notebooks/OASIS-1_dataset/
+
 # OS files
 .DS_Store
 *.swp
