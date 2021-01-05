@@ -565,7 +565,7 @@ print("Bias shape \n", fc.bias.shape)
 
 
 # %% [markdown]
-# ## TODO Network design
+# ## Network design
 # Construct here the network corresponding to the scheme and the following
 # description:
 #
@@ -581,8 +581,7 @@ print("Bias shape \n", fc.bias.shape)
 # layers, a dropout layer with a dropout rate of 0.5 is inserted. 
 
 # %%
-# ToDo
-# begin{student version}
+# To complete
 class CustomNetwork(nn.Module):
     
     def __init__(self):
@@ -594,50 +593,6 @@ class CustomNetwork(nn.Module):
     def forward(self, x):
         # Compose the forward operation using the layers defined in __init__
         pass
-# end{student version}
-# %%
-# begin{correction version}
-class CustomNetwork(nn.Module):
-    
-    def __init__(self):
-        super(CustomNetwork, self).__init__()
-        self.convolutions = nn.Sequential(
-            nn.Conv3d(1, 8, 3, padding=1),
-            # Size 8@30x40x30
-            nn.BatchNorm3d(8),
-            nn.LeakyReLU(),
-            PadMaxPool3d(2, 2),
-            # Size 8@15x20x15
-            
-            nn.Conv3d(8, 16, 3, padding=1),
-            # Size 16@15x20x15
-            nn.BatchNorm3d(16),
-            nn.LeakyReLU(),
-            PadMaxPool3d(2, 2),
-            # Size 16@8x10x8)
-            
-            nn.Conv3d(16, 32, 3, padding=1),
-            # Size 32@8x10x8
-            nn.BatchNorm3d(32),
-            nn.LeakyReLU(),
-            PadMaxPool3d(2, 2),
-            # Size 32@4x5x4
-            
-        )
-        
-        self.linear = nn.Sequential(
-            nn.Dropout(p=0.5),
-            nn.Linear(32 * 4 * 5 * 4, 2)
-            
-        )
-        
-    def forward(self, x):
-        x = self.convolutions(x)
-        x = x.view(x.size(0), -1)
-        x = self.linear(x)
-        return x
-
-# end{correction version}
 # %% [markdown]
 # # 3. Train & Test
 #
@@ -660,7 +615,7 @@ class CustomNetwork(nn.Module):
 # doesn't mean that this would be the case on an independent test set.
 
 # %%
-# begin{student version}
+# To complete
 def train(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train a CNN
@@ -695,57 +650,6 @@ def train(model, train_loader, criterion, optimizer, n_epochs):
             train_best_loss = train_metrics['mean_loss']
 
     return best_model
-
-
-# end{student version}
-
-# begin{correction version}
-def train(model, train_loader, criterion, optimizer, n_epochs):
-    """
-    Method used to train a CNN
-    
-    Args:
-        model: (nn.Module) the neural network
-        train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
-        criterion: (nn.Module) a method to compute the loss of a mini-batch of images
-        optimizer: (torch.optim) an optimization algorithm
-        n_epochs: (int) number of epochs performed during training
-
-    Returns:
-        best_model: (nn.Module) the trained neural network
-    """
-    best_model = deepcopy(model)
-    train_best_loss = np.inf
-
-    for epoch in range(n_epochs):
-        model.train()
-        train_loader.dataset.train()
-        for i, data in enumerate(train_loader, 0):
-            # Retrieve mini-batch and put data on GPU with .cuda()
-            images, labels = data['image'].cuda(), data['label'].cuda()
-            # Forward pass
-            outputs = model(images)
-            # Loss computation
-            loss = criterion(outputs, labels)
-            # Back-propagation (gradients computation)
-            loss.backward()
-            # Parameters update
-            optimizer.step()
-            # Erase previous gradients
-            optimizer.zero_grad()
-
-        _, train_metrics = test(model, train_loader, criterion)
-
-        print(f'Epoch %i: loss = %f, balanced accuracy = %f' 
-              % (epoch, train_metrics['mean_loss'],
-                 train_metrics['balanced_accuracy']))
-
-        if train_metrics['mean_loss'] < train_best_loss:
-            best_model = deepcopy(model)
-            train_best_loss = train_metrics['mean_loss']
-    
-    return best_model
-# end{correction version}
 
 def test(model, data_loader, criterion):
     """
@@ -844,12 +748,8 @@ train_datasetLeftHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetLeftHC = MRIDataset(img_dir, valid_df, transform=transform)
 
 # Try different learning rates
-# begin{correction version}
-learning_rate = 10**-4
-# end{correction version}
-# begin{student version}
+# To complete
 learning_rate = ... # Try different learning rates between 10**-5 and 10**-3
-# end{student version}
 n_epochs = 30
 batch_size = 4
 
@@ -906,12 +806,8 @@ transform = CropRightHC(2)
 train_datasetRightHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetRightHC = MRIDataset(img_dir, valid_df, transform=transform)
 
-# begin{correction version}
-learning_rate = 10**-4
-# end{correction version}
-# begin{student version}
+# To complete
 learning_rate = ... # You can reuse the same learning rate as before
-# end{student version}
 n_epochs = 30
 batch_size = 4
 
@@ -936,26 +832,10 @@ print(train_metricsRightHC)
 # combined. Here we can give both hippocampi the same weight.
 
 # %%
-# begin{correction version}
+# To complete
 def softvoting(leftHC_df, rightHC_df):
-    df1 = leftHC_df.set_index('participant_id', drop=True)
-    df2 = rightHC_df.set_index('participant_id', drop=True)
-    results_df = pd.DataFrame(index=df1.index.values,
-                              columns=['true_label', 'predicted_label',
-                                       'proba0', 'proba1'])
-    results_df.true_label = df1.true_label
-    # Compute predicted label and probabilities
-    results_df.proba1 = 0.5 * df1.proba1 + 0.5 * df2.proba1
-    results_df.proba0 = 0.5 * df1.proba0 + 0.5 * df2.proba0
-    results_df.predicted_label = (0.5 * df1.proba1 + 0.5 * df2.proba1 > 0.5).astype(int)
+    # To complete. Implement soft-voting with same weights on both hippocampi.
 
-    return results_df
-# end{correction version}
-# begin{student version}
-def softvoting(leftHC_df, rightHC_df):
-    # ToDo implement soft-voting with same weights on both hippocampi.
-
-# end{student version}
 
 valid_results = softvoting(valid_resultsLeftHC_df, valid_resultsRightHC_df)
 valid_metrics = compute_metrics(valid_results.true_label, valid_results.predicted_label)
@@ -1105,11 +985,11 @@ class AutoEncoder(nn.Module):
 # loss.
 
 # %%
-# begin{correction version}
+# To complete
 def trainAE(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train an AutoEncoder
-
+    
     Args:
         model: (nn.Module) the neural network
         train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
@@ -1127,56 +1007,8 @@ def trainAE(model, train_loader, criterion, optimizer, n_epochs):
         model.train()
         train_loader.dataset.train()
         for i, data in enumerate(train_loader, 0):
-            # ToDo
             # Complete the training function in a similar way
             # than for the CNN classification training.
-            # Retrieve mini-batch
-            images, labels = data['image'].cuda(), data['label'].cuda()
-            # Forward pass + loss computation
-            _, outputs = model((images))
-            loss = criterion(outputs, images)
-            # Back-propagation
-            loss.backward()
-            # Parameters update
-            optimizer.step()
-            # Erase previous gradients
-            optimizer.zero_grad()
-
-        mean_loss = testAE(model, train_loader, criterion)
-
-        print(f'Epoch %i: loss = %f' % (epoch, mean_loss))
-
-        if mean_loss < train_best_loss:
-            best_model = deepcopy(model)
-            train_best_loss = mean_loss
-
-    return best_model
-# end{correction version}
-
-# begin{student version}
-def trainAE(model, train_loader, criterion, optimizer, n_epochs):
-    """
-    Method used to train an AutoEncoder
-    
-    Args:
-        model: (nn.Module) the neural network
-        train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
-        criterion: (nn.Module) a method to compute the loss of a mini-batch of images
-        optimizer: (torch.optim) an optimization algorithm
-        n_epochs: (int) number of epochs performed during training
-
-    Returns:
-        best_model: (nn.Module) the trained neural network.
-    """
-    best_model = deepcopy(model)
-    train_best_loss = np.inf
-
-    for epoch in range(n_epochs):
-        model.train()
-        train_loader.dataset.train()
-        for i, data in enumerate(train_loader, 0):
-            # ToDo Complete the training function in a similar way
-            # than for the CNN classification training.
 
         mean_loss = testAE(model, train_loader, criterion)
 
@@ -1187,7 +1019,6 @@ def trainAE(model, train_loader, criterion, optimizer, n_epochs):
             train_best_loss = mean_loss
     
     return best_model
-# end{student version}
 
 
 def testAE(model, data_loader, criterion):
