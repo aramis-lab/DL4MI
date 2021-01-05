@@ -43,6 +43,7 @@ pipeline {
              conda activate jb_env
              cd jupyter-book
              mkdir -p _build/.jupyter_cache
+             make clean
              make
              sed -i 's+github/aramis-lab/DL4MI/blob/main/jupyter-book/notebooks+github/aramis-lab/DL4MI/blob/student/notebooks+g' _build/html/notebooks/*.html
              conda deactivate
