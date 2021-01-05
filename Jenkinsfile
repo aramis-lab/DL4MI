@@ -21,7 +21,6 @@ pipeline {
              eval "$(conda shell.bash hook)"
              conda create -y -n jb_env python=3.7
              conda activate jb_env
-             pip install clinicadl
              pip install torchsummary
              pip install jupyterlab
              pip install -r jupyter-book/requirements.txt
