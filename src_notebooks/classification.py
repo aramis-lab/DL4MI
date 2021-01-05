@@ -157,9 +157,9 @@ population_df
 #
 #
 # The preprocessed images are store in the [CAPS
-# format](http://www.clinica.run/doc/CAPS/Introduction/) and all have the same
-# size (121x145x121). You will find below a *class* called `MRIDataset` that
-# allows to browse easily the database.
+# folder structure](http://www.clinica.run/doc/CAPS/Introduction/) and all have
+# the same size (121x145x121). You will find below a *class* called `MRIDataset`
+# which allows easy browsing in the database.
 
 # %%
 from torch.utils.data import Dataset, DataLoader, sampler
@@ -169,7 +169,6 @@ class MRIDataset(Dataset):
     
     def __init__(self, img_dir, data_df, transform=None):
         """
-
         Args:
             img_dir (str): path to the CAPS directory containing preprocessed images
             data_df (DataFrame): metadata of the population.
