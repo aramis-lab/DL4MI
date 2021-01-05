@@ -12,5 +12,6 @@ matplotlib==3.2.2
 numpy==1.19.4
 pandas==1.1.5
 scikit-learn==0.22.2
+nibabel==3.0.2
 torchsummary==1.5.1
 torchvision==0.8.1
