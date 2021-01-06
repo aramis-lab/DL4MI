@@ -57,11 +57,9 @@ disease](https://aramislab.paris.inria.fr/clinicadl/tuto/intro.html) tutorial.
 
 ### Clinical context
 
-*
-*
-*
-*
-*
+* [Alzheimer's association](https://www.alz.org/alzheimer_s_dementia)
+* [Advances in Alzheimer's Disease: Imaging and Biomarker Research](https://www.youtube.com/watch?v=7J3-59mRcxk) (Video by Dr Philip Scheltens)
+* [Imaging biomarkers in Alzheimer's disease](http://www.sciencedirect.com/science/article/pii/B978012816176000020X) (Book chapter by Dr Carole Sudre et al.)
 
 ### Public datasets
 
@@ -70,6 +68,12 @@ disease](https://aramislab.paris.inria.fr/clinicadl/tuto/intro.html) tutorial.
 * [Open Access Series of Imaging Studies](https://www.oasis-brains.org)
 
 ## Deep learning
+
+### Courses
+
+* [Introduction to Deep Learning](http://introtodeeplearning.com/) by MIT
+* [Deep Learning](https://www.deeplearning.ai/) by Andrew Ng
+* [Convolutional Neural Networks for Visual Recognition](http://cs231n.stanford.edu/) by Stanford University
 
 ### Books
 
@@ -103,15 +107,17 @@ disease](https://aramislab.paris.inria.fr/clinicadl/tuto/intro.html) tutorial.
 
 ### Neuroimaging
 
-* [Nipype: Neuroimaging in Python - Pipelines and Interfaces](https://nipype.readthedocs.io)
-* [FreeSurfer Software Suite: An open source software suite for processing and analyzing (human) brain MRI images](http://freesurfer.net)
-* [Statistical Parametric Mapping: Analysis of Brain Imaging Data Sequences](https://www.fil.ion.ucl.ac.uk/spm/)
-* [FMRIB Software Library: A fMRI, MRI and DTI analysis software](https://surfer.nmr.mgh.harvard.edu/fswiki/FSL)
+* [FreeSurfer](http://freesurfer.net): An open source software suite for processing and analyzing (human) brain MRI images
+* [Statistical Parametric Mapping](https://www.fil.ion.ucl.ac.uk/spm/): Analysis of Brain Imaging Data Sequences
+* [FMRIB Software Library](https://surfer.nmr.mgh.harvard.edu/fswiki/FSL): A fMRI, MRI and DTI analysis software]
+* [Nipype](https://nipype.readthedocs.io): Neuroimaging in Python - Pipelines and Interfaces
+* [BIDS Apps](https://bids-apps.neuroimaging.io/apps/): Portable neuroimaging pipelines that understand BIDS datasets
+* [Clinica](http://www.clinica.run): A software platform for clinical neuroimaging studies
 
 ### Data analysis
 
-* [PyTorch: An Imperative Style, High-Performance Deep Learning Library](https://pytorch.org)
-* [TensorFlow: Large-Scale Machine Learning on Heterogeneous Systems](https://www.tensorflow.org)
-* [scikit-learn: Machine Learning in Python](https://scikit-learn.org)
-* [clinica: A software platform for clinical neuroimaging studies](http://www.clinica.run)
-* [clinicadl: A framework for the reproducible classification of Alzheimer's disease using deep learning](https://clinicadl.readthedocs.io)
+* [PyTorch](https://pytorch.org): An Imperative Style, High-Performance Deep Learning Library
+* [TensorFlow](https://www.tensorflow.org): Large-Scale Machine Learning on Heterogeneous Systems
+* [scikit-learn](https://scikit-learn.org): Machine Learning in Python
+* [Clinica](http://www.clinica.run): A software platform for clinical neuroimaging studies
+* [ClinicaDL](https://clinicadl.readthedocs.io): A framework for the reproducible classification of Alzheimer's disease using deep learning
