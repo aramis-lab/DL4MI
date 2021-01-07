@@ -157,9 +157,9 @@ population_df
 #
 #
 # The preprocessed images are store in the [CAPS
-# format](http://www.clinica.run/doc/CAPS/Introduction/) and all have the same
-# size (121x145x121). You will find below a *class* called `MRIDataset` that
-# allows to browse easily the database.
+# folder structure](http://www.clinica.run/doc/CAPS/Introduction/) and all have
+# the same size (121x145x121). You will find below a *class* called `MRIDataset`
+# which allows easy browsing in the database.
 
 # %%
 from torch.utils.data import Dataset, DataLoader, sampler
@@ -169,7 +169,6 @@ class MRIDataset(Dataset):
     
     def __init__(self, img_dir, data_df, transform=None):
         """
-
         Args:
             img_dir (str): path to the CAPS directory containing preprocessed images
             data_df (DataFrame): metadata of the population.
@@ -582,22 +581,7 @@ print("Bias shape \n", fc.bias.shape)
 # layers, a dropout layer with a dropout rate of 0.5 is inserted. 
 
 # %%
-# ToDo
-# begin{student version}
-class CustomNetwork(nn.Module):
-    
-    def __init__(self):
-        super(CustomNetwork, self).__init__()
-        # Create the layers composing the network.
-        # TIP: you can use Sequential to avoid naming all the layers one by one.
-        pass
-        
-    def forward(self, x):
-        # Compose the forward operation using the layers defined in __init__
-        pass
-# end{student version}
-# %%
-# begin{correction version}
+# To complete
 class CustomNetwork(nn.Module):
     
     def __init__(self):
@@ -638,7 +622,6 @@ class CustomNetwork(nn.Module):
         x = self.linear(x)
         return x
 
-# end{correction version}
 # %% [markdown]
 # # 3. Train & Test
 #
@@ -661,46 +644,6 @@ class CustomNetwork(nn.Module):
 # doesn't mean that this would be the case on an independent test set.
 
 # %%
-# begin{student version}
-def train(model, train_loader, criterion, optimizer, n_epochs):
-    """
-    Method used to train a CNN
-
-    Args:
-        model: (nn.Module) the neural network
-        train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
-        criterion: (nn.Module) a method to compute the loss of a mini-batch of images
-        optimizer: (torch.optim) an optimization algorithm
-        n_epochs: (int) number of epochs performed during training
-
-    Returns:
-        best_model: (nn.Module) the trained neural network
-    """
-    best_model = deepcopy(model)
-    train_best_loss = np.inf
-
-    for epoch in range(n_epochs):
-        model.train()
-        train_loader.dataset.train()
-        for i, data in enumerate(train_loader, 0):
-            # Complete the train iteration
-
-        _, train_metrics = test(model, train_loader, criterion)
-
-        print(f'Epoch %i: loss = %f, balanced accuracy = %f'
-              % (epoch, train_metrics['mean_loss'],
-                 train_metrics['balanced_accuracy']))
-
-        if train_metrics['mean_loss'] < train_best_loss:
-            best_model = deepcopy(model)
-            train_best_loss = train_metrics['mean_loss']
-
-    return best_model
-
-
-# end{student version}
-
-# begin{correction version}
 def train(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train a CNN
@@ -746,7 +689,6 @@ def train(model, train_loader, criterion, optimizer, n_epochs):
             train_best_loss = train_metrics['mean_loss']
     
     return best_model
-# end{correction version}
 
 def test(model, data_loader, criterion):
     """
@@ -845,12 +787,7 @@ train_datasetLeftHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetLeftHC = MRIDataset(img_dir, valid_df, transform=transform)
 
 # Try different learning rates
-# begin{correction version}
 learning_rate = 10**-4
-# end{correction version}
-# begin{student version}
-learning_rate = ... # Try different learning rates between 10**-5 and 10**-3
-# end{student version}
 n_epochs = 30
 batch_size = 4
 
@@ -907,12 +844,7 @@ transform = CropRightHC(2)
 train_datasetRightHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetRightHC = MRIDataset(img_dir, valid_df, transform=transform)
 
-# begin{correction version}
 learning_rate = 10**-4
-# end{correction version}
-# begin{student version}
-learning_rate = ... # You can reuse the same learning rate as before
-# end{student version}
 n_epochs = 30
 batch_size = 4
 
@@ -937,7 +869,6 @@ print(train_metricsRightHC)
 # combined. Here we can give both hippocampi the same weight.
 
 # %%
-# begin{correction version}
 def softvoting(leftHC_df, rightHC_df):
     df1 = leftHC_df.set_index('participant_id', drop=True)
     df2 = rightHC_df.set_index('participant_id', drop=True)
@@ -951,12 +882,6 @@ def softvoting(leftHC_df, rightHC_df):
     results_df.predicted_label = (0.5 * df1.proba1 + 0.5 * df2.proba1 > 0.5).astype(int)
 
     return results_df
-# end{correction version}
-# begin{student version}
-def softvoting(leftHC_df, rightHC_df):
-    # ToDo implement soft-voting with same weights on both hippocampi.
-
-# end{student version}
 
 valid_results = softvoting(valid_resultsLeftHC_df, valid_resultsRightHC_df)
 valid_metrics = compute_metrics(valid_results.true_label, valid_results.predicted_label)
@@ -1106,7 +1031,6 @@ class AutoEncoder(nn.Module):
 # loss.
 
 # %%
-# begin{correction version}
 def trainAE(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train an AutoEncoder
@@ -1152,43 +1076,6 @@ def trainAE(model, train_loader, criterion, optimizer, n_epochs):
             train_best_loss = mean_loss
 
     return best_model
-# end{correction version}
-
-# begin{student version}
-def trainAE(model, train_loader, criterion, optimizer, n_epochs):
-    """
-    Method used to train an AutoEncoder
-    
-    Args:
-        model: (nn.Module) the neural network
-        train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
-        criterion: (nn.Module) a method to compute the loss of a mini-batch of images
-        optimizer: (torch.optim) an optimization algorithm
-        n_epochs: (int) number of epochs performed during training
-
-    Returns:
-        best_model: (nn.Module) the trained neural network.
-    """
-    best_model = deepcopy(model)
-    train_best_loss = np.inf
-
-    for epoch in range(n_epochs):
-        model.train()
-        train_loader.dataset.train()
-        for i, data in enumerate(train_loader, 0):
-            # ToDo Complete the training function in a similar way
-            # than for the CNN classification training.
-
-        mean_loss = testAE(model, train_loader, criterion)
-
-        print(f'Epoch %i: loss = %f' % (epoch, mean_loss))
-
-        if mean_loss < train_best_loss:
-            best_model = deepcopy(model)
-            train_best_loss = mean_loss
-    
-    return best_model
-# end{student version}
 
 
 def testAE(model, data_loader, criterion):

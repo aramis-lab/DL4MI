@@ -1,55 +1,23 @@
-# Medical imaging
-*TODO*
+# Deep learning for computer-aided diagnosis from images
 
-# Clinical context of Alzheimer's disease
+<object data="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_DL-for-CAD.pdf" type="application/pdf" width="100%" height="700px">
+    <embed src="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_DL-for-CAD.pdf">
+        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_DL-for-CAD.pdf">Download PDF</a>.</p>
+    </embed>
+</object>
 
-Alzheimer’s disease (AD) is the main type of dementia, which are diseases
-characterised by memory troubles, behavioural changes and cognitive issues.
-Given that the processes causing AD start many years before the symptoms
-appear, it is of great importance to find a way to identify, as early as
-possible, if a certain subject will develop AD dementia. This is important to
-provide adequate care to the patient and information to the family. Moreover,
-this is vital in order to provide an effective treatment in the future, as
-therapies are more likely to be effective if administered early. It is thus
-important to identify which patients should be included in clinical trials
-and/or could benefit of the treatment.
-
-The diagnosis of AD mainly relies on clinical evaluation and cognitive
-assessment using neuropsychological tests. However, diagnosis has evolved
-thanks to advances in neuroimaging. Neuroimaging provides useful information
-such as atrophy due to gray matter loss with anatomical magnetic resonance
-imaging (MRI) or hypometabolism with <sup>18</sup>F-fluorodeoxyglucose positron
-emission tomography (FDG PET).  A major interest is then to analyse those
-markers to identify dementia at an early stage.
-
-# Deep learning: application to neuroimaging
-
-Deep learning is an ill-defined term that may refer to many different concepts.
-In this tutorial, deep learning designate methods used to optimize a **network**
-that executes a task whose success is quantified by a **loss function**. This
-optimization or learning process is based on a **dataset**, whose samples are
-used to optimize the parameters of the network.
-
-Deep learning networks are a succession of functions (called **layers**) which
-transform their inputs into outputs (called **feature maps**).
-There are two types of layers:
-
-- Layers including learnable parameters that will be updated to improve the
-  loss (for example convolutions).
-- Layers with fixed behaviour during the whole training process (for example
-  pooling or activation functions).
-
-Indeed, some characteristics are not modified during the training of the
-networks.  These components are fixed prior to training according to
-**hyperparameters**, such as the number of layers or intrinsic characteristics
-of layers. One of the main difficulties of deep learning is often not to train
-the networks, but to find good hyperparameters that will be adapted to the task
-and the dataset. This problem gave birth to a research field called **Neural
-Architecture Search** (NAS) and is not in the scope of this practical session.
-
-For more information, you can check out our [Deep learning classification from
-brain MRI: Application to Alzheimer’s
+For more information on Alzheimer's disease and CNNs for image classification,
+you can check out our [Deep learning classification from brain MRI: Application
+to Alzheimer’s
 disease](https://aramislab.paris.inria.fr/clinicadl/tuto/intro.html) tutorial.
+
+# Medical image synthesis with deep learning
+
+<object data="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_Image-synthesis.pdf" type="application/pdf" width="100%" height="700px">
+    <embed src="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_Image-synthesis.pdf">
+        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_Image-synthesis.pdf">Download PDF</a>.</p>
+    </embed>
+</object>
 
 # External resources
 
@@ -57,11 +25,9 @@ disease](https://aramislab.paris.inria.fr/clinicadl/tuto/intro.html) tutorial.
 
 ### Clinical context
 
-*
-*
-*
-*
-*
+* [Alzheimer's association](https://www.alz.org/alzheimer_s_dementia)
+* [Advances in Alzheimer's Disease: Imaging and Biomarker Research](https://www.youtube.com/watch?v=7J3-59mRcxk) (Video by Dr Philip Scheltens)
+* [Imaging biomarkers in Alzheimer's disease](http://www.sciencedirect.com/science/article/pii/B978012816176000020X) (Book chapter by Dr Carole Sudre et al.)
 
 ### Public datasets
 
@@ -70,6 +36,12 @@ disease](https://aramislab.paris.inria.fr/clinicadl/tuto/intro.html) tutorial.
 * [Open Access Series of Imaging Studies](https://www.oasis-brains.org)
 
 ## Deep learning
+
+### Courses
+
+* [Introduction to Deep Learning](http://introtodeeplearning.com/) by MIT
+* [Deep Learning](https://www.deeplearning.ai/) by Andrew Ng
+* [Convolutional Neural Networks for Visual Recognition](http://cs231n.stanford.edu/) by Stanford University
 
 ### Books
 
@@ -103,15 +75,17 @@ disease](https://aramislab.paris.inria.fr/clinicadl/tuto/intro.html) tutorial.
 
 ### Neuroimaging
 
-* [Nipype: Neuroimaging in Python - Pipelines and Interfaces](https://nipype.readthedocs.io)
-* [FreeSurfer Software Suite: An open source software suite for processing and analyzing (human) brain MRI images](http://freesurfer.net)
-* [Statistical Parametric Mapping: Analysis of Brain Imaging Data Sequences](https://www.fil.ion.ucl.ac.uk/spm/)
-* [FMRIB Software Library: A fMRI, MRI and DTI analysis software](https://surfer.nmr.mgh.harvard.edu/fswiki/FSL)
+* [FreeSurfer](http://freesurfer.net): An open source software suite for processing and analyzing (human) brain MRI images
+* [Statistical Parametric Mapping](https://www.fil.ion.ucl.ac.uk/spm/): Analysis of Brain Imaging Data Sequences
+* [FMRIB Software Library](https://surfer.nmr.mgh.harvard.edu/fswiki/FSL): A fMRI, MRI and DTI analysis software]
+* [Nipype](https://nipype.readthedocs.io): Neuroimaging in Python - Pipelines and Interfaces
+* [BIDS Apps](https://bids-apps.neuroimaging.io/apps/): Portable neuroimaging pipelines that understand BIDS datasets
+* [Clinica](http://www.clinica.run): A software platform for clinical neuroimaging studies
 
 ### Data analysis
 
-* [PyTorch: An Imperative Style, High-Performance Deep Learning Library](https://pytorch.org)
-* [TensorFlow: Large-Scale Machine Learning on Heterogeneous Systems](https://www.tensorflow.org)
-* [scikit-learn: Machine Learning in Python](https://scikit-learn.org)
-* [clinica: A software platform for clinical neuroimaging studies](http://www.clinica.run)
-* [clinicadl: A framework for the reproducible classification of Alzheimer's disease using deep learning](https://clinicadl.readthedocs.io)
+* [PyTorch](https://pytorch.org): An Imperative Style, High-Performance Deep Learning Library
+* [TensorFlow](https://www.tensorflow.org): Large-Scale Machine Learning on Heterogeneous Systems
+* [scikit-learn](https://scikit-learn.org): Machine Learning in Python
+* [Clinica](http://www.clinica.run): A software platform for clinical neuroimaging studies
+* [ClinicaDL](https://clinicadl.readthedocs.io): A framework for the reproducible classification of Alzheimer's disease using deep learning
