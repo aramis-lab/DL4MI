@@ -35,6 +35,7 @@ GPU card).
 * Clone the repository:
 ```
 git clone https://github.com/aramis-lab/DL4MI.git
+git checkout student
 ```
 
 * Create a dedicated environment
