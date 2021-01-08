@@ -101,7 +101,6 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 # torchsummary and torchvision
 from torchsummary import summary
@@ -402,8 +401,8 @@ def train_generator(train_loader, test_loader, num_epoch=500,
     def sample_images(epoch):
         """Saves a generated sample from the validation set"""
         imgs = next(iter(test_loader))
-        real_A = Variable(imgs["T1"].type(Tensor))
-        real_B = Variable(imgs["T2"].type(Tensor))
+        real_A = imgs["T1"].type(Tensor)
+        real_B = imgs["T2"].type(Tensor)
         fake_B = generator(real_A)
         img_sample = torch.cat((real_A.data, fake_B.data, real_B.data), -2)
         save_image(img_sample, f"./images/generator/epoch-{epoch}.png",
@@ -419,8 +418,8 @@ def train_generator(train_loader, test_loader, num_epoch=500,
         for i, batch in enumerate(train_loader):
 
             # Inputs T1-w and T2-w
-            real_t1 = Variable(batch["T1"].type(Tensor))
-            real_t2 = Variable(batch["T2"].type(Tensor))
+            real_t1 = batch["T1"].type(Tensor)
+            real_t2 = batch["T2"].type(Tensor)
 
             # Remove stored gradients
             optimizer.zero_grad()
@@ -601,36 +600,38 @@ def evaluate_generator(generator):
     cuda = True if torch.cuda.is_available() else False
     Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
-    for i, batch in enumerate(train_loader):
+    with torch.no_grad():
 
-        # Inputs T1-w and T2-w
-        real_t1 = Variable(batch["T1"].type(Tensor), requires_grad=False)
-        real_t2 = Variable(batch["T2"].type(Tensor), requires_grad=False)
-        fake_t2 = Variable(generator(real_t1), requires_grad=False)
+        for i, batch in enumerate(train_loader):
 
-        mae = mean_absolute_error(real_t2, fake_t2).item()
-        psnr = peak_signal_to_noise_ratio(real_t2, fake_t2).item()
-        ssim = structural_similarity_index(real_t2, fake_t2).item()
+            # Inputs T1-w and T2-w
+            real_t1 = batch["T1"].type(Tensor)
+            real_t2 = batch["T2"].type(Tensor)
+            fake_t2 = generator(real_t1)
 
-        res_train.append([mae, psnr, ssim])
+            mae = mean_absolute_error(real_t2, fake_t2).item()
+            psnr = peak_signal_to_noise_ratio(real_t2, fake_t2).item()
+            ssim = structural_similarity_index(real_t2, fake_t2).item()
 
-    for i, batch in enumerate(test_loader):
+            res_train.append([mae, psnr, ssim])
 
-        # Inputs T1-w and T2-w
-        real_t1 = Variable(batch["T1"].type(Tensor), requires_grad=False)
-        real_t2 = Variable(batch["T2"].type(Tensor), requires_grad=False)
-        fake_t2 = Variable(generator(real_t1), requires_grad=False)
+        for i, batch in enumerate(test_loader):
 
-        mae = mean_absolute_error(real_t2, fake_t2).item()
-        psnr = peak_signal_to_noise_ratio(real_t2, fake_t2).item()
-        ssim = structural_similarity_index(real_t2, fake_t2).item()
+            # Inputs T1-w and T2-w
+            real_t1 = batch["T1"].type(Tensor)
+            real_t2 = batch["T2"].type(Tensor)
+            fake_t2 = generator(real_t1)
 
-        res_test.append([mae, psnr, ssim])
+            mae = mean_absolute_error(real_t2, fake_t2).item()
+            psnr = peak_signal_to_noise_ratio(real_t2, fake_t2).item()
+            ssim = structural_similarity_index(real_t2, fake_t2).item()
 
-    df = pd.DataFrame([
-        pd.DataFrame(res_train, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze(),
-        pd.DataFrame(res_test, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze()
-    ], index=['Training set', 'Test set']).T
+            res_test.append([mae, psnr, ssim])
+
+        df = pd.DataFrame([
+            pd.DataFrame(res_train, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze(),
+            pd.DataFrame(res_test, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze()
+        ], index=['Training set', 'Test set']).T
     return df
 
 # %%
@@ -849,8 +850,8 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
     def sample_images(epoch):
         """Saves a generated sample from the validation set"""
         imgs = next(iter(test_loader))
-        real_t1 = Variable(imgs["T1"].type(Tensor))
-        real_t2 = Variable(imgs["T2"].type(Tensor))
+        real_t1 = imgs["T1"].type(Tensor)
+        real_t2 = imgs["T2"].type(Tensor)
         fake_t2 = generator(real_t1)
         img_sample = torch.cat((real_t1.data, fake_t2.data, real_t2.data), -2)
         save_image(img_sample, f"./images/cgan/epoch-{epoch}.png",
@@ -866,14 +867,12 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
         for i, batch in enumerate(train_loader):
 
             # Inputs T1-w and T2-w
-            real_t1 = Variable(batch["T1"].type(Tensor))
-            real_t2 = Variable(batch["T2"].type(Tensor))
+            real_t1 = batch["T1"].type(Tensor)
+            real_t2 = batch["T2"].type(Tensor)
 
             # Create labels
-            valid = Variable(Tensor(np.ones((real_t2.size(0), 1, 1, 1))),
-                             requires_grad=False)
-            fake = Variable(Tensor(np.zeros((real_t2.size(0), 1, 1, 1))),
-                            requires_grad=False)
+            valid = Tensor(np.ones((real_t2.size(0), 1, 1, 1)))
+            fake = Tensor(np.zeros((real_t2.size(0), 1, 1, 1)))
 
             # -----------------
             #  Train Generator
@@ -1147,8 +1146,8 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
     def sample_images(epoch):
         """Saves a generated sample from the validation set"""
         imgs = next(iter(test_loader))
-        real_t1 = Variable(imgs["T1"].type(Tensor))
-        real_t2 = Variable(imgs["T2"].type(Tensor))
+        real_t1 = imgs["T1"].type(Tensor)
+        real_t2 = imgs["T2"].type(Tensor)
         fake_t2 = generator_from_t1_to_t2(real_t1)
         img_sample = torch.cat((real_t1.data, fake_t2.data, real_t2.data), -2)
         save_image(img_sample, f"./images/cyclegan/epoch-{epoch}.png",
@@ -1164,19 +1163,15 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
         for i, batch in enumerate(train_loader):
 
             # Inputs T1-w and T2-w
-            real_t1 = Variable(batch["T1"].type(Tensor))
-            real_t2 = Variable(batch["T2"].type(Tensor))
+            real_t1 = batch["T1"].type(Tensor)
+            real_t2 = batch["T2"].type(Tensor)
 
             # Create labels
-            valid_t1 = Variable(Tensor(np.ones((real_t1.size(0), 1, 1, 1))),
-                                requires_grad=False)
-            imitation_t1 = Variable(Tensor(np.zeros((real_t1.size(0), 1, 1, 1))),
-                                    requires_grad=False)
+            valid_t1 = Tensor(np.ones((real_t1.size(0), 1, 1, 1)))
+            imitation_t1 = Tensor(np.zeros((real_t1.size(0), 1, 1, 1)))
 
-            valid_t2 = Variable(Tensor(np.ones((real_t2.size(0), 1, 1, 1))),
-                                requires_grad=False)
-            imitation_t2 = Variable(Tensor(np.zeros((real_t2.size(0), 1, 1, 1))),
-                                    requires_grad=False)
+            valid_t2 = Tensor(np.ones((real_t2.size(0), 1, 1, 1)))
+            imitation_t2 = Tensor(np.zeros((real_t2.size(0), 1, 1, 1)))
 
             # ------------------
             #  Train Generators
@@ -1189,7 +1184,7 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
             pred_fake_t2 = discriminator_from_t1_to_t2(fake_t2)
             loss_GAN_from_t1_to_t2 = criterion_GAN_from_t1_to_t2(pred_fake_t2, valid_t2)
 
-            fake_t1 = generator_from_t1_to_t2(real_t2)
+            fake_t1 = generator_from_t2_to_t1(real_t2)
             pred_fake_t1 = discriminator_from_t2_to_t1(fake_t1)
             loss_GAN_from_t2_to_t1 = criterion_GAN_from_t2_to_t1(pred_fake_t1, valid_t1)
 
