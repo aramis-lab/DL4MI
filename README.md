@@ -9,7 +9,7 @@ are inside the folder `src_notebooks`
 Install the environment to transform the python scripts into notebooks. We
 recommend to create a conda environment and install inside the requirements:
 
-```
+```bash
 conda create --name DL4MI  python=3.8
 conda activate DL4MI
 pip install -r requirements.txt
@@ -32,18 +32,20 @@ displayed as notebooks.
   jupyter lab you have to right click "Open with -> notebook" to open the
   python scripts with the notebook interface.
 
-#### Use jupytext to conver an existing notebook
+#### Use jupytext to convert an existing notebook
 
-If you hav an existing notebook and you want to transform it pure Python, use the following command:
+If you have an existing notebook and you want to transform it pure Python, use the following command:
 
-```
+```bash
 jupytext --to py notebook.ipynb
 ```
+
 ### Update all the notebooks
 
 Once your changes are done in the scripts (the `src_notebooks` files) run at the root folder:
 
-```
+```bash
 make
 ```
+
 This command will recreate automatically the notebooks and clean the outputs.
