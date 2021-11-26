@@ -44,7 +44,7 @@ html:
 
 sphinx:
   config:
-    html_theme: pydata_sphix_theme
+    html_theme: pydata_sphinx_theme
     nb_custom_formats:
       .py:
         - jupytext.reads
