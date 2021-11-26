@@ -63,7 +63,7 @@ pipeline {
           sh '''#!/usr/bin/env bash
              set +x
              ls ./
-             scp -r jupyter-book/_build/html/* aramislab.paris.inria.fr:~/workshops/DL4MI/2021/ 
+             scp -r jupyter-book/_build/html/* aramislab.paris.inria.fr:~/workshops/DL4MI/2022/
              '''
           echo 'Finish uploading artifacts'   
         }

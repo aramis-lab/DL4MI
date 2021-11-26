@@ -1,7 +1,7 @@
 # Book settings
-title: Deep Learning for Medical Imaging (DL4MI 2021)
+title: Deep Learning for Medical Imaging (DL4MI 2022)
 author: The Aramis Team
-copyright: "2021"  
+copyright: "2022"  
 logo: 'images/logoAramis.png'
 description: Tutorial for the deep learning classification from brain MRI
 
@@ -44,6 +44,7 @@ html:
 
 sphinx:
   config:
+    html_theme: pydata_sphix_theme
     nb_custom_formats:
       .py:
         - jupytext.reads
