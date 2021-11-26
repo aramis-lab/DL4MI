@@ -1,6 +1,7 @@
 # Book settings
-title: Deep learning for Medical Imaging
+title: Deep Learning for Medical Imaging (DL4MI 2021)
 author: The Aramis Team
+copyright: "2021"  
 logo: 'images/logoAramis.png'
 description: Tutorial for the deep learning classification from brain MRI
 
