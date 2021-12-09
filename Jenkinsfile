@@ -41,6 +41,7 @@ pipeline {
              set +x
              eval "$(conda shell.bash hook)" 
              conda activate jb_env
+             make
              cd jupyter-book
              mkdir -p _build/.jupyter_cache
              make clean

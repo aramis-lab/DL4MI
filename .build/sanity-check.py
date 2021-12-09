@@ -8,6 +8,9 @@ import difflib
 # TODO: we could get the list from .gitignore
 IGNORE_LIST = [
     '.ipynb_checkpoints',
+    'OASIS-1_dataset',
+    'IXI-dataset',
+    'images'
 ]
 
 folder1, folder2 = sys.argv[1:3]
