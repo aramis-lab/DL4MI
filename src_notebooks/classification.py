@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.5'
-#       jupytext_version: 1.7.1
+#       jupytext_version: 1.11.5
 #   kernelspec:
 #     display_name: Python 3
 #     name: python3
@@ -54,15 +54,12 @@ import tarfile
 # The original images were preprocessed using [Clinica](http://www.clinica.run/): 
 # a software platform for clinical neuroimaging studies. 
 # Preprocessed images and other files are distributed in a tarball, run 
-# the following command to download it.
+# the following commands to download and extract them.
 
 # %%
-gcontext = ssl.SSLContext()
-dataseturl = "https://aramislab.paris.inria.fr/files/data/databases/DL4MI/OASIS-1-dataset_pt_new.tar.gz" 
-fstream = urllib.request.urlopen(dataseturl, context=gcontext)
-tarfile = tarfile.open(fileobj=fstream, mode="r:gz")
-tarfile.extractall()
-
+! wget --no-check-certificate --show-progress https://aramislab.paris.inria.fr/files/data/databases/DL4MI/OASIS-1-dataset_pt_new.tar.gz
+# %%
+! tar xf OASIS-1-dataset_pt_new.tar.gz -C ./
 # %% [markdown]
 # One crucial step before training a neural network is to check the dataset.
 # Are the classes balanced? Are there biases in the dataset that may
