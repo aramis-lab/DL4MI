@@ -425,7 +425,7 @@ def train_generator(train_loader, test_loader, num_epoch=500,
             optimizer.zero_grad()
 
             # Generate fake T2 images from the true T1 images
-            fake_t2 =  generator(real_t1) 
+            fake_t2 =  generator(real_t1)
 
             # Compute the corresponding loss
             loss =  criterion(fake_t2, real_t2)
@@ -905,6 +905,7 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
             loss_real = criterion_GAN(pred_real, valid)
 
             # Fake loss
+            fake_t2 = generator(real_t1)
             pred_fake = discriminator(fake_t2.detach(), real_t1)
             loss_fake = criterion_GAN(pred_fake, fake)
 
@@ -1207,9 +1208,9 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
             optimizer_generator_from_t1_to_t2.step()
             optimizer_generator_from_t2_to_t1.step()
 
-            # ---------------------
-            #  Train Discriminator
-            # ---------------------
+            # ----------------------
+            #  Train Discriminators
+            # ----------------------
 
             optimizer_discriminator_from_t1_to_t2.zero_grad()
             optimizer_discriminator_from_t2_to_t1.zero_grad()
@@ -1222,9 +1223,11 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
             loss_real_t1 = criterion_GAN_from_t2_to_t1(pred_real_t1, valid_t1)
 
             # Fake loss
+            fake_t2 = generator_from_t1_to_t2(real_t1)
             pred_fake_t2 = discriminator_from_t1_to_t2(fake_t2.detach())
             loss_fake_t2 = criterion_GAN_from_t1_to_t2(pred_fake_t2, imitation_t2)
 
+            fake_t1 = generator_from_t2_to_t1(real_t2)
             pred_fake_t1 = discriminator_from_t2_to_t1(fake_t1.detach())
             loss_fake_t1 = criterion_GAN_from_t2_to_t1(pred_fake_t1, imitation_t1)
 
