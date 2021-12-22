@@ -19,10 +19,8 @@ pipeline {
           sh '''#!/usr/bin/env bash
              set +x
              eval "$(conda shell.bash hook)"
-             conda create -y -n jb_env python=3.7
+             conda create -y -n jb_env python=3.8 jupyterlab
              conda activate jb_env
-             pip install torchsummary
-             pip install jupyterlab
              pip install -r jupyter-book/requirements.txt
              conda deactivate
              '''
