@@ -3,7 +3,7 @@ title: Deep Learning for Medical Imaging (DL4MI 2022)
 author: The Aramis Team
 copyright: "2022"  
 logo: 'images/logoAramis.png'
-description: Tutorial for the deep learning classification from brain MRI
+description: Tutorial for deep learning classification from brain MRIs
 
 exclude_patterns:
   -  _build
@@ -26,8 +26,8 @@ launch_buttons:
 ######################################################################################
 # Execution settings
 execute:
-  execute_notebooks         : cache  # Whether to execute notebooks at build time. Must be one of ("auto", "force", "cache", "off")
-  cache                     : "_build/.jupyter_cache/"  # A path to the jupyter cache that will be used to store execution artifacs. Defaults to `_build/.jupyter_cache/`
+  execute_notebooks         : off  # Whether to execute notebooks at build time. Must be one of ("auto", "force", "cache", "off")
+  # cache                     : "_build/.jupyter_cache/"  # A path to the jupyter cache that will be used to store execution artifacs. Defaults to `_build/.jupyter_cache/`
   exclude_patterns:
     - 'background' 
   timeout: 240    
@@ -49,7 +49,7 @@ sphinx:
       .py:
         - jupytext.reads
         - fmt: py:percent
-    mathjax_config:
+    mathjax3_config:
       TeX:
         Macros:
           "N": "\\mathbb{N}"

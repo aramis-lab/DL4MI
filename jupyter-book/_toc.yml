@@ -1,14 +1,13 @@
-- file: index
-  title: Deep Learning for Medical Imaging
-
-- part: Background and resources
+format: jb-book
+root: index
+title: Deep Learning for Medical Imaging
+parts:
+- caption: Background and resources
   chapters:
-    - file: background
-
-- part: Part 1 - Classification in the context of computer-aided diagnosis
+  - file: background
+- caption: Part 1 - Classification in the context of computer-aided diagnosis
   chapters:
-    - file: notebooks/classification
-
-- part: Part 2 - Image synthesis
+  - file: notebooks/classification
+- caption: Part 2 - Image synthesis
   chapters:
-    - file: notebooks/GAN
+  - file: notebooks/GAN
