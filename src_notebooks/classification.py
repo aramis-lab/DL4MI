@@ -142,15 +142,14 @@ population_df
 # 3. Conversion to tensor format (.pt).
 #
 # 
-# As mentioned above, to obtain the preprocessed images, we used some Clinica's
-# pipelines in order to: 
+# As mentioned above, to obtain the preprocessed images, we used some pipelines provided 
+# by Clinica and ClinicaDL in order to: 
 #
 # 1. Convert the original dataset to BIDS format ([`clinica convert
 # oasis-2-bids`](http://www.clinica.run/doc/Converters/OASIS2BIDS/)).
 # 2. Get the non-linear registration and segmentation of grey mater (pipeline
 # [`t1-volume`](http://www.clinica.run/doc/Pipelines/T1_Volume/)).
-# 3. Obtain the preprocessed images in tensor format (pipeline
-# [`deeplearning-prepare-data`](https://aramislab.paris.inria.fr/clinica/docs/public/latest/Pipelines/DeepLearning_PrepareData/)).
+# 3. Obtain the preprocessed images in tensor format ([tensor extraction using ClinicaDL, `clinicadl extract`](https://clinicadl.readthedocs.io/en/stable/Preprocessing/Extract/)).
 #
 #
 # The preprocessed images are store in the [CAPS
