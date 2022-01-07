@@ -294,11 +294,11 @@ def show_slices(slices):
     for i, slice in enumerate(slices):
         axes[i].imshow(slice.T, cmap="gray", origin="lower")
 
-slice_0 = raw_np[80, :, :]
-slice_1 = raw_np[:, 130, :]
-slice_2 = raw_np[:, :, 60]
-show_slices([rotate(slice_0, 90), rotate(slice_1, 90), slice_2])
-plt.suptitle(f'Slice of raw image of subject {subject}')
+slice_0 = raw_np[:, :, 78]
+slice_1 = raw_np[122, :, :]
+slice_2 = raw_np[:, 173, :]
+show_slices([slice_0, rotate(slice_1, 90), rotate(slice_2, 90)])
+plt.suptitle(f'Slices of raw image of subject {subject}')
 plt.show()
 
 slice_0 = preprocessed_pt[0, 60, :, :]
