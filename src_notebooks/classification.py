@@ -561,7 +561,7 @@ print("Bias shape \n", fc.bias.shape)
 
 
 # %% [markdown]
-# ## TODO Network design
+# ## Network design
 # Construct here the network corresponding to the scheme and the following
 # description:
 #
@@ -582,41 +582,13 @@ class CustomNetwork(nn.Module):
     
     def __init__(self):
         super(CustomNetwork, self).__init__()
-        self.convolutions = nn.Sequential(
-            nn.Conv3d(1, 8, 3, padding=1),
-            # Size 8@30x40x30
-            nn.BatchNorm3d(8),
-            nn.LeakyReLU(),
-            PadMaxPool3d(2, 2),
-            # Size 8@15x20x15
-            
-            nn.Conv3d(8, 16, 3, padding=1),
-            # Size 16@15x20x15
-            nn.BatchNorm3d(16),
-            nn.LeakyReLU(),
-            PadMaxPool3d(2, 2),
-            # Size 16@8x10x8)
-            
-            nn.Conv3d(16, 32, 3, padding=1),
-            # Size 32@8x10x8
-            nn.BatchNorm3d(32),
-            nn.LeakyReLU(),
-            PadMaxPool3d(2, 2),
-            # Size 32@4x5x4
-            
-        )
-        
-        self.linear = nn.Sequential(
-            nn.Dropout(p=0.5),
-            nn.Linear(32 * 4 * 5 * 4, 2)
-            
-        )
+        # Create the layers composing the network.
+        # TIP: you can use Sequential to avoid naming all the layers one by one.
+        pass 
         
     def forward(self, x):
-        x = self.convolutions(x)
-        x = x.view(x.size(0), -1)
-        x = self.linear(x)
-        return x
+        # Compose the forward operation using the layers defined in __init__
+        pass
 
 # %% [markdown]
 # # 3. Train & Test
@@ -661,18 +633,7 @@ def train(model, train_loader, criterion, optimizer, n_epochs):
         model.train()
         train_loader.dataset.train()
         for i, data in enumerate(train_loader, 0):
-            # Retrieve mini-batch and put data on GPU with .cuda()
-            images, labels = data['image'].cuda(), data['label'].cuda()
-            # Forward pass
-            outputs = model(images)
-            # Loss computation
-            loss = criterion(outputs, labels)
-            # Back-propagation (gradients computation)
-            loss.backward()
-            # Parameters update
-            optimizer.step()
-            # Erase previous gradients
-            optimizer.zero_grad()
+            # Complete the train iterarion
 
         _, train_metrics = test(model, train_loader, criterion)
 
@@ -755,8 +716,6 @@ def compute_metrics(ground_truth, prediction):
     
     return metrics_dict
 
-
-
 # %% [markdown]
 # ## Train Classification with Left HC
 #
@@ -783,7 +742,8 @@ train_datasetLeftHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetLeftHC = MRIDataset(img_dir, valid_df, transform=transform)
 
 # Try different learning rates
-learning_rate = 10**-4
+# To complete
+learning_rate = ... # Try different learning rates between 10**-5 and 10**-3
 n_epochs = 30
 batch_size = 4
 
@@ -840,7 +800,8 @@ transform = CropRightHC(2)
 train_datasetRightHC = MRIDataset(img_dir, train_df, transform=transform)
 valid_datasetRightHC = MRIDataset(img_dir, valid_df, transform=transform)
 
-learning_rate = 10**-4
+# To complete
+learning_rate = ... # You can reuse the same learning rate as before
 n_epochs = 30
 batch_size = 4
 
@@ -865,19 +826,10 @@ print(train_metricsRightHC)
 # combined. Here we can give both hippocampi the same weight.
 
 # %%
+# To complete
 def softvoting(leftHC_df, rightHC_df):
-    df1 = leftHC_df.set_index('participant_id', drop=True)
-    df2 = rightHC_df.set_index('participant_id', drop=True)
-    results_df = pd.DataFrame(index=df1.index.values,
-                              columns=['true_label', 'predicted_label',
-                                       'proba0', 'proba1'])
-    results_df.true_label = df1.true_label
-    # Compute predicted label and probabilities
-    results_df.proba1 = 0.5 * df1.proba1 + 0.5 * df2.proba1
-    results_df.proba0 = 0.5 * df1.proba0 + 0.5 * df2.proba0
-    results_df.predicted_label = (0.5 * df1.proba1 + 0.5 * df2.proba1 > 0.5).astype(int)
+    # To complete. Implement soft-voting with same weights on both hippocampi.
 
-    return results_df
 
 valid_results = softvoting(valid_resultsLeftHC_df, valid_resultsRightHC_df)
 valid_metrics = compute_metrics(valid_results.true_label, valid_results.predicted_label)
@@ -1027,6 +979,7 @@ class AutoEncoder(nn.Module):
 # loss.
 
 # %%
+# To complete
 def trainAE(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train an AutoEncoder
@@ -1048,20 +1001,8 @@ def trainAE(model, train_loader, criterion, optimizer, n_epochs):
         model.train()
         train_loader.dataset.train()
         for i, data in enumerate(train_loader, 0):
-            # ToDo
             # Complete the training function in a similar way
             # than for the CNN classification training.
-            # Retrieve mini-batch
-            images, labels = data['image'].cuda(), data['label'].cuda()
-            # Forward pass + loss computation
-            _, outputs = model((images))
-            loss = criterion(outputs, images)
-            # Back-propagation
-            loss.backward()
-            # Parameters update
-            optimizer.step()
-            # Erase previous gradients
-            optimizer.zero_grad()
 
         mean_loss = testAE(model, train_loader, criterion)
 

@@ -293,33 +293,10 @@ class FinalLayer(nn.Module):
 class GeneratorUNet(nn.Module):
     def __init__(self, in_channels=1, out_channels=1):
         super(GeneratorUNet, self).__init__()
-
-        self.down1 = UNetDown(in_channels, 64)
-        self.down2 = UNetDown(64, 128)
-        self.down3 = UNetDown(128, 256)
-        self.down4 = UNetDown(256, 512)
-        self.down5 = UNetDown(512, 512)
-
-        self.up1 = UNetUp(512, 512)
-        self.up2 = UNetUp(1024, 256)
-        self.up3 = UNetUp(512, 128)
-        self.up4 = UNetUp(256, 64)
-
-        self.final = FinalLayer(128, 1)
+        # To complete
 
     def forward(self, x):
-        d1 = self.down1(x)
-        d2 = self.down2(d1)
-        d3 = self.down3(d2)
-        d4 = self.down4(d3)
-        d5 = self.down5(d4)
-
-        u1 = self.up1(d5)
-        u2 = self.up2(u1, d4)
-        u3 = self.up3(u2, d3)
-        u4 = self.up4(u3, d2)
-
-        return self.final(u4, d1)
+        # To complete
 
 # %% [markdown]
 # Let's have a look at the architecture of our generator:
@@ -385,10 +362,10 @@ def train_generator(train_loader, test_loader, num_epoch=500,
         os.makedirs("./images/generator")
 
     # Loss function
-    criterion = torch.nn.L1Loss() # A loss for a voxel-wise comparison of images like torch.nn.L1Loss
+    criterion =     # To complete. A loss for a voxel-wise comparison of images like torch.nn.L1Loss
 
     # Initialize the generator
-    generator = GeneratorUNet()
+    generator =    # To complete.
 
     if cuda:
         generator = generator.cuda()
@@ -425,10 +402,10 @@ def train_generator(train_loader, test_loader, num_epoch=500,
             optimizer.zero_grad()
 
             # Generate fake T2 images from the true T1 images
-            fake_t2 =  generator(real_t1)
+            fake_t2 =   # To complete
 
             # Compute the corresponding loss
-            loss =  criterion(fake_t2, real_t2)
+            loss =    # To complete
 
             # Compute the gradient and perform one optimization step
             loss.backward()
@@ -709,20 +686,11 @@ def discriminator_block(in_filters, out_filters):
 class Discriminator(nn.Module):
     def __init__(self, in_channels=1):
         super(Discriminator, self).__init__()
-        self.layers = nn.Sequential(
-            discriminator_block(in_channels*2, 64),
-            discriminator_block(64, 128),
-            discriminator_block(128, 256),
-            discriminator_block(256, 512),
-            nn.Conv2d(512, 1, 1, stride=4, padding=0),
-        )
-
+        # To complete
 
     def forward(self, img_A, img_B):
         # Concatenate image and condition image by channels to produce input
-        img_input = torch.cat((img_A, img_B), 1)
-        return self.layers(img_input)
-
+        # To complete
 # %% [markdown]
 # Let's have a look at the architecture of our discriminator:
 
@@ -825,15 +793,15 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
         os.makedirs("./images/cgan")
 
     # Loss functions
-    criterion_GAN = torch.nn.BCEWithLogitsLoss()  # A loss adapted to binary classification like torch.nn.BCEWithLogitsLoss
-    criterion_pixelwise = torch.nn.L1Loss()  # A loss for a voxel-wise comparison of images like torch.nn.L1Loss
+    criterion_GAN =    # To complete. A loss adapted to binary classification like torch.nn.BCEWithLogitsLoss
+    criterion_pixelwise =   # To complete. A loss for a voxel-wise comparison of images like torch.nn.L1Loss
 
     lambda_GAN = 1.  # Weights criterion_GAN in the generator loss
     lambda_pixel = 1.  # Weights criterion_pixelwise in the generator loss
 
     # Initialize generator and discriminator
-    generator = GeneratorUNet()
-    discriminator = Discriminator()
+    generator =    # To complete
+    discriminator =    # To complete
 
     if cuda:
         generator = generator.cuda()
@@ -880,12 +848,12 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
             optimizer_generator.zero_grad()
 
             # GAN loss
-            fake_t2 = generator(real_t1)
-            pred_fake = discriminator(fake_t2, real_t1)
-            loss_GAN = criterion_GAN(pred_fake, valid)
+            fake_t2 =    # To complete
+            pred_fake =    # To complete
+            loss_GAN =    # To complete
 
             # L1 loss
-            loss_pixel = criterion_pixelwise(fake_t2, real_t2)
+            loss_pixel =    # To complete
 
             # Total loss
             loss_generator = lambda_GAN * loss_GAN + lambda_pixel * loss_pixel
@@ -901,13 +869,13 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
             optimizer_discriminator.zero_grad()
 
             # Real loss
-            pred_real = discriminator(real_t2, real_t1)
-            loss_real = criterion_GAN(pred_real, valid)
+            pred_real =    # To complete
+            loss_real =    # To complete
 
             # Fake loss
-            fake_t2 = generator(real_t1)
-            pred_fake = discriminator(fake_t2.detach(), real_t1)
-            loss_fake = criterion_GAN(pred_fake, fake)
+            fake_t2 =     # To complete
+            pred_fake =     # To complete
+            loss_fake =     # To complete
 
             # Total loss
             loss_discriminator = 0.5 * (loss_real + loss_fake)
@@ -1115,10 +1083,10 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
     lambda_pixel = 1.  # Weights criterion_pixelwise in the generator loss
 
     # Initialize generators and discriminators
-    generator_from_t1_to_t2 = GeneratorUNet()
-    generator_from_t2_to_t1 = GeneratorUNet()
-    discriminator_from_t1_to_t2 = DiscriminatorCycle()
-    discriminator_from_t2_to_t1 = DiscriminatorCycle()
+    generator_from_t1_to_t2 =    # To complete
+    generator_from_t2_to_t1 =    # To complete
+    discriminator_from_t1_to_t2 =    # To complete
+    discriminator_from_t2_to_t1 =    # To complete
 
     if cuda:
         generator_from_t1_to_t2 = generator_from_t1_to_t2.cuda()
@@ -1181,20 +1149,20 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
             optimizer_generator_from_t2_to_t1.zero_grad()
 
             # GAN loss
-            fake_t2 = generator_from_t1_to_t2(real_t1)
-            pred_fake_t2 = discriminator_from_t1_to_t2(fake_t2)
-            loss_GAN_from_t1_to_t2 = criterion_GAN_from_t1_to_t2(pred_fake_t2, valid_t2)
+            fake_t2 =    # To complete
+            pred_fake_t2 =     # To complete
+            loss_GAN_from_t1_to_t2 =    # To complete 
 
-            fake_t1 = generator_from_t2_to_t1(real_t2)
-            pred_fake_t1 = discriminator_from_t2_to_t1(fake_t1)
-            loss_GAN_from_t2_to_t1 = criterion_GAN_from_t2_to_t1(pred_fake_t1, valid_t1)
+            fake_t1 =     # To complete
+            pred_fake_t1 =     # To complete
+            loss_GAN_from_t2_to_t1 =     # To complete
 
             # L1 loss
-            fake_fake_t1 = generator_from_t2_to_t1(fake_t2)
-            loss_pixel_from_t1_to_t2 = criterion_pixelwise_from_t1_to_t2(fake_fake_t1, real_t1)
+            fake_fake_t1 =    # To complete
+            loss_pixel_from_t1_to_t2 =     # To complete
 
-            fake_fake_t2 = generator_from_t1_to_t2(fake_t1)
-            loss_pixel_from_t2_to_t1 = criterion_pixelwise_from_t2_to_t1(fake_fake_t2, real_t2)
+            fake_fake_t2 =    # To complete
+            loss_pixel_from_t2_to_t1 =    # To complete
 
             # Total loss
             loss_generator_from_t1_to_t2 = (lambda_GAN * loss_GAN_from_t1_to_t2 +
@@ -1216,20 +1184,20 @@ def train_cyclegan(train_loader, test_loader, num_epoch=500,
             optimizer_discriminator_from_t2_to_t1.zero_grad()
 
             # Real loss
-            pred_real_t2 = discriminator_from_t1_to_t2(real_t2)
-            loss_real_t2 = criterion_GAN_from_t1_to_t2(pred_real_t2, valid_t2)
+            pred_real_t2 =    # To complete
+            loss_real_t2 =    # To complete
 
-            pred_real_t1 = discriminator_from_t2_to_t1(real_t1)
-            loss_real_t1 = criterion_GAN_from_t2_to_t1(pred_real_t1, valid_t1)
+            pred_real_t1 =    # To complete
+            loss_real_t1 =    # To complete
 
             # Fake loss
-            fake_t2 = generator_from_t1_to_t2(real_t1)
-            pred_fake_t2 = discriminator_from_t1_to_t2(fake_t2.detach())
-            loss_fake_t2 = criterion_GAN_from_t1_to_t2(pred_fake_t2, imitation_t2)
+            fake_t2 =    # To complete
+            pred_fake_t2 =    # To complete
+            loss_fake_t2 =    # To complete
 
-            fake_t1 = generator_from_t2_to_t1(real_t2)
-            pred_fake_t1 = discriminator_from_t2_to_t1(fake_t1.detach())
-            loss_fake_t1 = criterion_GAN_from_t2_to_t1(pred_fake_t1, imitation_t1)
+            fake_t1 =    # To complete
+            pred_fake_t1 =    # To complete
+            loss_fake_t1 =    # To complete
 
             # Total loss
             loss_discriminator_from_t1_to_t2 = 0.5 * (loss_real_t2 + loss_fake_t2)
