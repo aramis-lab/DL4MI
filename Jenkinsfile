@@ -8,9 +8,9 @@ pipeline {
       stage('Create Conda env') {
         agent { label 'gpu' }
         environment {
-           PATH = "$HOME/miniconda/bin:$PATH"
-           }
-        //when { changeset "requirements.txt" }   
+        PATH = "$HOME/miniconda/bin:$PATH"
+        }
+        //when { changeset "requirements.txt" }
         steps {
           echo 'Create Conda env for Jupyter-book'
           echo 'My branch name is ${BRANCH_NAME}'
@@ -31,20 +31,20 @@ pipeline {
         environment {
           PATH = "$HOME/miniconda/bin:$PATH"
           GIT_SSH_COMMAND = 'ssh -i /builds/.ssh/github_idrsa'
-          }
+        }
         steps {
           echo 'Building Jupyter-book...'
           sh 'echo "Agent name: ${NODE_NAME}"'
           sh '''#!/usr/bin/env bash
              set +x
-             eval "$(conda shell.bash hook)" 
+             eval "$(conda shell.bash hook)"
              conda activate jb_env
              make
              cd jupyter-book
              mkdir -p _build/.jupyter_cache
              make clean
              make
-             sed -i 's+github/aramis-lab/DL4MI/blob/main/jupyter-book/notebooks+github/aramis-lab/DL4MI/blob/student/notebooks+g' _build/html/notebooks/*.html
+             sed -i 's+github/aramis-lab/DL4MI/blob/main/jupyter-book/notebooks+github/aramis-lab/DL4MI/blob/student22/notebooks+g' _build/html/notebooks/*.html
              conda deactivate
              '''
           stash(name: 'doc_html', includes: 'jupyter-book/_build/html/**')
@@ -54,7 +54,7 @@ pipeline {
         agent { label 'gpu' }
         environment {
           PATH = "$HOME/miniconda/bin:$PATH"
-          }
+        }
         steps {
           echo 'Deploying in webserver...'
           sh 'echo "Agent name: ${NODE_NAME}"'
@@ -64,7 +64,7 @@ pipeline {
              ls ./
              scp -r jupyter-book/_build/html/* aramislab.paris.inria.fr:~/workshops/DL4MI/2022/
              '''
-          echo 'Finish uploading artifacts'   
+          echo 'Finish uploading artifacts'
         }
       }
     }
@@ -81,4 +81,4 @@ pipeline {
 //          body: "Something is wrong with ${env.BUILD_URL}"
 //      }
 //    }
-  }
+}
