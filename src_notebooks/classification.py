@@ -1099,7 +1099,7 @@ def testAE(model, data_loader, criterion):
     return total_loss / len(data_loader.dataset) / np.product(data_loader.dataset.size)
 
 # %%
-learning_rate = 10**-4
+learning_rate = 10**-3
 n_epochs = 30
 batch_size = 4
 
