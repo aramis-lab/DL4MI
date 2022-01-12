@@ -1,7 +1,7 @@
 # Deep learning for computer-aided diagnosis from images
 
-<object data="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_DL-for-CAD.pdf" type="application/pdf" width="100%" height="700px">
-    <embed src="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_DL-for-CAD.pdf">
+<object data="https://aramislab.paris.inria.fr/workshops/slides/2022-01-12__AI4Health_DL4MI_DL-for-CAD.pdf" type="application/pdf" width="100%" height="700px">
+    <embed src="https://aramislab.paris.inria.fr/workshops/slides/2022-01-12__AI4Health_DL4MI_DL-for-CAD.pdf">
         <p>This browser does not support PDFs. Please download the PDF to view it: <a href="https://aramislab.paris.inria.fr/workshops/slides/2020-01-07_AI4Health_DL4MI_DL-for-CAD.pdf">Download PDF</a>.</p>
     </embed>
 </object>
