@@ -38,9 +38,6 @@ from os import path
 from torchvision import transforms
 import random
 from copy import deepcopy
-import urllib.request
-import ssl
-import tarfile
 
 # %% [markdown]
 # ## Database
@@ -146,9 +143,9 @@ population_df
 # by Clinica and ClinicaDL in order to: 
 #
 # 1. Convert the original dataset to BIDS format ([`clinica convert
-# oasis-2-bids`](http://www.clinica.run/doc/Converters/OASIS2BIDS/)).
+# oasis-2-bids`](https://aramislab.paris.inria.fr/docs/public/latest/Converters/OASIS2BIDS/)).
 # 2. Get the non-linear registration and segmentation of grey mater (pipeline
-# [`t1-volume`](http://www.clinica.run/doc/Pipelines/T1_Volume/)).
+# [`t1-volume`](https://aramislab.paris.inria.fr/docs/public/latest/Pipelines/T1_Volume/)).
 # 3. Obtain the preprocessed images in tensor format ([tensor extraction using ClinicaDL, `clinicadl extract`](https://clinicadl.readthedocs.io/en/stable/Preprocessing/Extract/)).
 #
 #
@@ -676,9 +673,10 @@ def train(model, train_loader, criterion, optimizer, n_epochs):
 
         _, train_metrics = test(model, train_loader, criterion)
 
-        print(f'Epoch %i: loss = %f, balanced accuracy = %f' 
-              % (epoch, train_metrics['mean_loss'],
-                 train_metrics['balanced_accuracy']))
+        print(
+            f"Epoch {epoch}: loss = {train_metrics['mean_loss']:.4f}, "
+            f"balanced accuracy = {train_metrics['balanced_accuracy']:.4f}"
+            ) 
 
         if train_metrics['mean_loss'] < train_best_loss:
             best_model = deepcopy(model)
@@ -1065,7 +1063,7 @@ def trainAE(model, train_loader, criterion, optimizer, n_epochs):
 
         mean_loss = testAE(model, train_loader, criterion)
 
-        print(f'Epoch %i: loss = %f' % (epoch, mean_loss))
+        print(f'Epoch {epoch}: loss = {mean_loss:.6f}')
 
         if mean_loss < train_best_loss:
             best_model = deepcopy(model)
@@ -1101,7 +1099,7 @@ def testAE(model, data_loader, criterion):
     return total_loss / len(data_loader.dataset) / np.product(data_loader.dataset.size)
 
 # %%
-learning_rate = 10**-2
+learning_rate = 10**-4
 n_epochs = 30
 batch_size = 4
 
@@ -1191,6 +1189,7 @@ train_codes, train_labels, names = compute_dataset_features(train_loaderLeftHC, 
 
 # %%
 from sklearn import mixture
+from sklearn.metrics import adjusted_rand_score
 
 n_components = 2
 model = mixture.GaussianMixture(n_components)
@@ -1198,10 +1197,10 @@ model.fit(train_codes)
 train_predict = model.predict(train_codes)
 
 metrics = compute_metrics(train_labels, train_predict)
-print(metrics)
-
+ari = adjusted_rand_score(train_labels, train_predict)
+print(f"Adjusted random index: {ari}")
 # %% [markdown]
-# The accuracy may not be very good, this could mean that the framework
+# The adjusted random index may not be very good, this could mean that the framework
 # clustered another characteristic that the one you tried to target.
 #
 # What is actually expected is that the clustering differenciation is made on
