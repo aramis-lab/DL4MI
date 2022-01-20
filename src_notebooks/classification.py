@@ -48,9 +48,9 @@ from copy import deepcopy
 # - CN (Cognitively Normal) for healthy participants.
 # - AD (Alzheimer's Disease) for patients affected by Alzheimer's disease.
 #
-# The original images were preprocessed using [Clinica](http://www.clinica.run/): 
-# a software platform for clinical neuroimaging studies. 
-# Preprocessed images and other files are distributed in a tarball, run 
+# The original images were preprocessed using [Clinica](http://www.clinica.run/):
+# a software platform for clinical neuroimaging studies.
+# Preprocessed images and other files are distributed in a tarball, run
 # the following commands to download and extract them.
 
 # %%
@@ -74,7 +74,12 @@ from copy import deepcopy
 # Let's explore the data:
 # %%
 # Load the complete dataset
-OASIS_df = pd.read_csv('OASIS-1_dataset/tsv_files/lab_1/OASIS_BIDS.tsv', sep='\t')
+OASIS_df = pd.read_csv(
+    'OASIS-1_dataset/tsv_files/lab_1/OASIS_BIDS.tsv', sep='\t',
+    usecols=['participant_id', 'session_id', 'alternative_id_1', 'sex',
+             'education_level', 'age_bl', 'diagnosis_bl', 'laterality', 'MMS',
+             'cdr_global', 'diagnosis']
+)
 # Show first items of the table
 print(OASIS_df.head())
 # First visual inspection
@@ -99,7 +104,7 @@ def characteristics_table(df, merged_df):
     merged_df = merged_df.set_index(['participant_id', 'session_id'], drop=True)
     df = df.set_index(['participant_id', 'session_id'], drop=True)
     sub_merged_df = merged_df.loc[df.index]
-    
+
     for diagnosis in population_df.index.values:
         diagnosis_df = sub_merged_df[df.diagnosis == diagnosis]
         population_df.loc[diagnosis, 'N'] = len(diagnosis_df)
@@ -138,9 +143,9 @@ population_df
 # 2. Segmentation of grey matter.
 # 3. Conversion to tensor format (.pt).
 #
-# 
-# As mentioned above, to obtain the preprocessed images, we used some pipelines provided 
-# by Clinica and ClinicaDL in order to: 
+#
+# As mentioned above, to obtain the preprocessed images, we used some pipelines provided
+# by Clinica and ClinicaDL in order to:
 #
 # 1. Convert the original dataset to BIDS format ([`clinica convert
 # oasis-2-bids`](https://aramislab.paris.inria.fr/docs/public/latest/Converters/OASIS2BIDS/)).
@@ -159,7 +164,7 @@ from torch.utils.data import Dataset, DataLoader, sampler
 from os import path
 
 class MRIDataset(Dataset):
-    
+
     def __init__(self, img_dir, data_df, transform=None):
         """
         Args:
@@ -174,15 +179,15 @@ class MRIDataset(Dataset):
         self.label_code = {"AD": 1, "CN": 0}
 
         self.size = self[0]['image'].shape
-        
+
     def __len__(self):
         return len(self.data_df)
-    
+
     def __getitem__(self, idx):
 
         diagnosis = self.data_df.loc[idx, 'diagnosis']
         label = self.label_code[diagnosis]
-        
+
         participant_id = self.data_df.loc[idx, 'participant_id']
         session_id = self.data_df.loc[idx, 'session_id']
         filename = 'subjects/' + participant_id + '/' + session_id + '/' + \
@@ -353,7 +358,7 @@ print(f"Validation dataset:\n {valid_population_df}")
 # ### Feature maps
 #
 # The outputs of the layers in a convolutional network are called feature maps.
-# Their size is written with the format: 
+# Their size is written with the format:
 #
 # > `n_channels @ dim1 x dim2 x dim3`
 #
@@ -361,7 +366,7 @@ print(f"Validation dataset:\n {valid_population_df}")
 # dimension is the batch size. This dimension is added by the `DataLoader` of
 # Pytorch which stacks the 4D tensors computed by a `Dataset`.
 
-# %% 
+# %%
 img_dir = path.join('OASIS-1_dataset', 'CAPS')
 batch_size=4
 
@@ -491,10 +496,10 @@ class PadMaxPool3d(nn.Module):
         coords = [self.stride - f_maps.size(i + 2) % self.stride for i in range(3)]
         for i, coord in enumerate(coords):
             if coord == self.stride:
-                coords[i] = 0 
-                
+                coords[i] = 0
+
         self.pad.padding = (coords[2], 0, coords[1], 0, coords[0], 0)
-        
+
         if self.return_indices:
             output, indices = self.pool(self.pad(f_maps))
 
@@ -523,8 +528,8 @@ class PadMaxPool3d(nn.Module):
 # > $O_i = ceil(\frac{I_i-k+2P}{S}) + 1$
 
 
-# %% [markdown] 
-# ### Dropout (`nn.Dropout`) 
+# %% [markdown]
+# ### Dropout (`nn.Dropout`)
 # The aim of a dropout layer is to replace a fixed proportion of the input
 # values by 0 during training only.
 #
@@ -571,12 +576,12 @@ print("Bias shape \n", fc.bias.shape)
 #
 # Then, the feature maps array is flattened in a 1D array to enter a
 # fully-connected layer. Between the convolutional and the fully-connected
-# layers, a dropout layer with a dropout rate of 0.5 is inserted. 
+# layers, a dropout layer with a dropout rate of 0.5 is inserted.
 
 # %%
 # To complete
 class CustomNetwork(nn.Module):
-    
+
     def __init__(self):
         super(CustomNetwork, self).__init__()
         self.convolutions = nn.Sequential(
@@ -586,29 +591,29 @@ class CustomNetwork(nn.Module):
             nn.LeakyReLU(),
             PadMaxPool3d(2, 2),
             # Size 8@15x20x15
-            
+
             nn.Conv3d(8, 16, 3, padding=1),
             # Size 16@15x20x15
             nn.BatchNorm3d(16),
             nn.LeakyReLU(),
             PadMaxPool3d(2, 2),
             # Size 16@8x10x8)
-            
+
             nn.Conv3d(16, 32, 3, padding=1),
             # Size 32@8x10x8
             nn.BatchNorm3d(32),
             nn.LeakyReLU(),
             PadMaxPool3d(2, 2),
             # Size 32@4x5x4
-            
+
         )
-        
+
         self.linear = nn.Sequential(
             nn.Dropout(p=0.5),
             nn.Linear(32 * 4 * 5 * 4, 2)
-            
+
         )
-        
+
     def forward(self, x):
         x = self.convolutions(x)
         x = x.view(x.size(0), -1)
@@ -640,7 +645,7 @@ class CustomNetwork(nn.Module):
 def train(model, train_loader, criterion, optimizer, n_epochs):
     """
     Method used to train a CNN
-    
+
     Args:
         model: (nn.Module) the neural network
         train_loader: (DataLoader) a DataLoader wrapping a MRIDataset
@@ -676,23 +681,23 @@ def train(model, train_loader, criterion, optimizer, n_epochs):
         print(
             f"Epoch {epoch}: loss = {train_metrics['mean_loss']:.4f}, "
             f"balanced accuracy = {train_metrics['balanced_accuracy']:.4f}"
-            ) 
+            )
 
         if train_metrics['mean_loss'] < train_best_loss:
             best_model = deepcopy(model)
             train_best_loss = train_metrics['mean_loss']
-    
+
     return best_model
 
 def test(model, data_loader, criterion):
     """
     Method used to test a CNN
-    
+
     Args:
         model: (nn.Module) the neural network
         data_loader: (DataLoader) a DataLoader wrapping a MRIDataset
         criterion: (nn.Module) a method to compute the loss of a mini-batch of images
-    
+
     Returns:
         results_df: (DataFrame) the label predicted for every subject
         results_metrics: (dict) a set of metrics
@@ -703,7 +708,7 @@ def test(model, data_loader, criterion):
                "true_label", "predicted_label"]
     results_df = pd.DataFrame(columns=columns)
     total_loss = 0
-    
+
     with torch.no_grad():
         for i, data in enumerate(data_loader, 0):
             images, labels = data['image'].cuda(), data['label'].cuda()
@@ -723,7 +728,7 @@ def test(model, data_loader, criterion):
     results_metrics = compute_metrics(results_df.true_label.values, results_df.predicted_label.values)
     results_df.reset_index(inplace=True, drop=True)
     results_metrics['mean_loss'] = total_loss / len(data_loader.dataset)
-    
+
     return results_df, results_metrics
 
 
@@ -733,24 +738,24 @@ def compute_metrics(ground_truth, prediction):
     tn = np.sum((prediction == 0) & (ground_truth == 0))
     fp = np.sum((prediction == 1) & (ground_truth == 0))
     fn = np.sum((prediction == 0) & (ground_truth == 1))
-    
+
     metrics_dict = dict()
     metrics_dict['accuracy'] = (tp + tn) / (tp + tn + fp + fn)
-    
+
     # Sensitivity
     if tp + fn != 0:
         metrics_dict['sensitivity'] = tp / (tp + fn)
     else:
         metrics_dict['sensitivity'] = 0.0
-        
+
     # Specificity
     if fp + tn != 0:
         metrics_dict['specificity'] = tn / (fp + tn)
     else:
         metrics_dict['specificity'] = 0.0
-        
+
     metrics_dict['balanced_accuracy'] = (metrics_dict['sensitivity'] + metrics_dict['specificity']) / 2
-    
+
     return metrics_dict
 
 
@@ -769,7 +774,7 @@ def compute_metrics(ground_truth, prediction):
 # To increase the training speed you can also increase the batch size. But be
 # careful, if the batch size becomes a non-negligible amount of the training
 # set it may have a negative impact on loss convergence [(Keskar et al,
-# 2016)](https://arxiv.org/abs/1609.04836). 
+# 2016)](https://arxiv.org/abs/1609.04836).
 #
 # Construction of dataset objects:
 
@@ -938,14 +943,14 @@ class CropMaxUnpool3d(nn.Module):
 # layer can replace the maximum values at the right place in the 2x2x2 sub-cube
 # of the feature map. They also indicate if some zero padding was applied to
 # the feature map so that the unpooling layer can correctly crop their output
-# feature map.  
+# feature map.
 
 # %%
 class AutoEncoder(nn.Module):
-    
+
     def __init__(self):
         super(AutoEncoder, self).__init__()
-        
+
         # Initial size (30, 40, 30)
 
         self.encoder = nn.Sequential(
@@ -954,13 +959,13 @@ class AutoEncoder(nn.Module):
             nn.LeakyReLU(),
             PadMaxPool3d(2, 2, return_indices=True, return_pad=True),
             # Size (15, 20, 15)
-            
+
             nn.Conv3d(8, 16, 3, padding=1),
             nn.BatchNorm3d(16),
             nn.LeakyReLU(),
             PadMaxPool3d(2, 2, return_indices=True, return_pad=True),
             # Size (8, 10, 8)
-            
+
             nn.Conv3d(16, 32, 3, padding=1),
             nn.BatchNorm3d(32),
             nn.LeakyReLU(),
@@ -970,7 +975,7 @@ class AutoEncoder(nn.Module):
             nn.Conv3d(32, 1, 1),
             # Size (4, 5, 4)
         )
-        
+
         self.decoder = nn.Sequential(
             nn.ConvTranspose3d(1, 32, 1),
             # Size (4, 5, 4)
@@ -993,7 +998,7 @@ class AutoEncoder(nn.Module):
             nn.Sigmoid()
             # Size (30, 40, 30)
         )
-        
+
     def forward(self, x):
         indices_list = []
         pad_list = []
@@ -1075,12 +1080,12 @@ def trainAE(model, train_loader, criterion, optimizer, n_epochs):
 def testAE(model, data_loader, criterion):
     """
     Method used to test an AutoEncoder
-    
+
     Args:
         model: (nn.Module) the neural network
         data_loader: (DataLoader) a DataLoader wrapping a MRIDataset
         criterion: (nn.Module) a method to compute the loss of a mini-batch of images
-    
+
     Returns:
         results_df: (DataFrame) the label predicted for every subject
         results_metrics: (dict) a set of metrics
@@ -1088,14 +1093,14 @@ def testAE(model, data_loader, criterion):
     model.eval()
     data_loader.dataset.eval()
     total_loss = 0
-    
+
     with torch.no_grad():
         for i, data in enumerate(data_loader, 0):
             images, labels = data['image'].cuda(), data['label'].cuda()
             _, outputs = model((images))
             loss = criterion(outputs, images)
             total_loss += loss.item()
-    
+
     return total_loss / len(data_loader.dataset) / np.product(data_loader.dataset.size)
 
 # %%

@@ -209,8 +209,8 @@ class IXIDataset(torch.utils.data.Dataset):
 # The parameters for each layer are given in the picture below.
 
 # %% [markdown]
-# <a href="https://ibb.co/QXBDNy3">
-#     <img src="https://i.ibb.co/g614TkL/Capture-d-cran-2020-03-02-16-04-06.png" width="800" border="0">
+# <a href="https://ibb.co/pnTXXrB">
+#   <img src="https://i.ibb.co/V3GBBpc/generator-architecture.png" width="800" border="0">
 # </a>
 
 # %% [markdown]
