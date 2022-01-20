@@ -83,7 +83,7 @@ OASIS_df = pd.read_csv(
 # Show first items of the table
 print(OASIS_df.head())
 # First visual inspection
-_ = OASIS_df.hist(figsize=(20, 14))
+_ = OASIS_df.hist(figsize=(16, 8))
 # %% [markdown]
 # From these graphics, it's possible to have an overview of the distribution of
 # the data, for the numerical values. For example, the educational level is
