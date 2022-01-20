@@ -209,9 +209,7 @@ class IXIDataset(torch.utils.data.Dataset):
 # The parameters for each layer are given in the picture below.
 
 # %% [markdown]
-# <a href="https://ibb.co/pnTXXrB">
-#   <img src="https://i.ibb.co/V3GBBpc/generator-architecture.png" width="800" border="0">
-# </a>
+# https://colab.research.google.com/drive/1br85sGD9zPip0WHn0esAKpXFNLJYDTMJ#scrollTo=Ps5kxeKxig-D
 
 # %% [markdown]
 #
@@ -687,9 +685,7 @@ evaluate_generator(generator)
 # channels for the first layer will be two (one for each image).
 
 # %% [markdown]
-# <a href="https://ibb.co/9b2jF0V">
-#   <img src="https://i.ibb.co/hBHvPNZ/Capture-d-cran-2020-03-02-16-04-14.png" width="800"  border="0">
-# </a>
+# ![Architecture of the discriminators](https://drive.google.com/uc?id=19dzdj0aR--tGVl6CqGTl_ZF5IfFiqcP3)
 
 # %% [markdown]
 # <div class="alert alert-block alert-info">
