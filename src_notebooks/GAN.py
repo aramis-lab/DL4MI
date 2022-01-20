@@ -209,7 +209,7 @@ class IXIDataset(torch.utils.data.Dataset):
 # The parameters for each layer are given in the picture below.
 
 # %% [markdown]
-# https://colab.research.google.com/drive/1br85sGD9zPip0WHn0esAKpXFNLJYDTMJ#scrollTo=Ps5kxeKxig-D
+# ![Architecture of the generator](https://drive.google.com/uc?id=14WfeMGLKrLC4XS90YeXRpiDK67NT91FU) 
 
 # %% [markdown]
 #
